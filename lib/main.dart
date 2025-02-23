@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:libora/features/views/home/home_page.dart';
 import 'package:libora/features/views/onboarding/onboarding_screen.dart';
 
 void main() {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: OnboardingScreen(),
+      home: HomePage(),
     );
   }
 }

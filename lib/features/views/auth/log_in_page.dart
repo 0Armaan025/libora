@@ -1,88 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/common/common_auth_btn.dart';
-import 'package:libora/features/views/auth/log_in_page.dart';
+import 'package:libora/features/views/auth/sign_up_page.dart';
 import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/utils.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class LogInPage extends StatefulWidget {
+  const LogInPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<LogInPage> createState() => _LogInPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
-  String selectedAvatar =
-      'https://cdn-icons-png.flaticon.com/128/1999/1999625.png';
-
+class _LogInPageState extends State<LogInPage> {
   bool _isObscure = true;
   bool _isAccepted = false;
-
-  // List of avatars (Replace with your own image URLs if needed)
-  final List<String> avatarOptions = [
-    'https://cdn-icons-png.flaticon.com/128/1999/1999625.png',
-    'https://cdn-icons-png.flaticon.com/128/4140/4140047.png',
-    'https://cdn-icons-png.flaticon.com/128/147/147144.png',
-    'https://cdn-icons-png.flaticon.com/128/236/236831.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/706/706830.png',
-  ];
-
-  void _showAvatarSelection() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Choose Your Avatar",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              GridView.builder(
-                shrinkWrap: true,
-                itemCount: avatarOptions.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedAvatar = avatarOptions[index];
-                      });
-                      Navigator.pop(context); // Close modal
-                    },
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(avatarOptions[index]),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,38 +23,12 @@ class _SignUpPageState extends State<SignUpPage> {
         child: SafeArea(
           child: Column(
             children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(selectedAvatar),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: _showAvatarSelection,
-                      child: const CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.camera_alt,
-                          color: Colors.black,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
               Container(
                 width: double.infinity,
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 20, top: 10),
                 child: Text(
-                  "Sign Up",
+                  "Log In",
                   style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontWeight: FontWeight.w400,
@@ -131,14 +37,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(
-                height: 35,
+                height: 55,
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 14.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Username (please keep it unqiue)",
+                    "Username",
                     style: GoogleFonts.poppins(
                       color: Colors.black,
                       fontSize: 18,
@@ -234,53 +140,23 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: _isAccepted,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isAccepted = value!;
-                        });
-                      },
-                      activeColor: Colors.black,
-                      checkColor: Colors.white,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "I accept that losing the username would mean losing the account.",
-                        style: GoogleFonts.poppins(
-                          color: Pallete().buttonColor,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-
-                    // Sign Up Button
-                  ],
-                ),
-              ),
               const SizedBox(
                 height: 20,
               ),
-              CommonAuthBtn(onTap: () {}, text: 'Sign up'),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.28),
+              CommonAuthBtn(onTap: () {}, text: 'Log In'),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.48),
               GestureDetector(
                 onTap: () {
                   // Navigate to Login Screen (Replace with actual navigation)
-                  moveScreen(context, LogInPage(), isPushReplacement: true);
+                  moveScreen(context, SignUpPage(), isPushReplacement: true);
                 },
                 child: Text.rich(
                   TextSpan(
-                    text: "Already have an account? ",
+                    text: "New to the app? ",
                     style: GoogleFonts.poppins(color: Colors.black),
                     children: [
                       TextSpan(
-                        text: "Log in",
+                        text: "Sign up",
                         style: GoogleFonts.poppins(
                           color: Colors.black,
                           fontWeight: FontWeight.w700,
