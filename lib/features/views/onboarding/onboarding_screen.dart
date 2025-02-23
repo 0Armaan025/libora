@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:libora/features/views/auth/sign_up_page.dart';
 import 'package:libora/features/views/onboarding/onboarding_content_page.dart';
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:libora/utils/utils.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -80,7 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   );
                 } else {
                   // Navigate to Home Screen (Replace with actual navigation)
-                  print('Go to Home Screen');
+                  moveScreen(context, SignUpPage(), isPushReplacement: true);
                 }
               },
               child: Container(
