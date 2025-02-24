@@ -22,7 +22,7 @@ class _HomePageContentState extends State<HomePageContent> {
           children: [
             Container(
               width: double.infinity,
-              height: size.height * 0.4,
+              height: size.height * 0.38,
 
               alignment: Alignment.centerLeft,
               decoration: BoxDecoration(

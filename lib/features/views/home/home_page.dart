@@ -5,8 +5,10 @@ import 'package:libora/common/active_space_tile.dart';
 import 'package:libora/common/common_navbar.dart';
 import 'package:libora/common/continue_reading_tile.dart';
 import 'package:libora/features/views/home/home_page_content.dart';
+import 'package:libora/features/views/search/search_view.dart';
 import 'package:libora/utils/theme/Pallete.dart';
-import 'package:libora/utils/constants.dart'; // Import constants.dart
+import 'package:libora/utils/constants.dart';
+import 'package:libora/utils/utils.dart'; // Import constants.dart
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,8 +31,9 @@ class _HomePageState extends State<HomePage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      appBar: buildAppBar("Libora"),
       bottomNavigationBar: CommonNavbar(
-        selectedIndex: myIndex, 
+        selectedIndex: myIndex,
         onTap: _onItemTapped, // Update index when tapped
       ),
       backgroundColor: HexColor("#f9f5ea"),
@@ -38,8 +41,8 @@ class _HomePageState extends State<HomePage> {
         index: selectedIndex,
         children: [
           HomePageContent(), // Page 0
-         Container(),
-         Container(),
+          SearchView(),
+          Container(),
         ],
       ),
     );
