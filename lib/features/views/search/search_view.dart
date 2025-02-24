@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -45,8 +46,7 @@ class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF2C2D32), // Background color
-
+      backgroundColor: HexColor("#f9f5ea"),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -61,7 +61,7 @@ class _SearchViewState extends State<SearchView> {
                   hintStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.search, color: Colors.white70),
                   filled: true,
-                  fillColor: Colors.grey[800],
+                  fillColor: Colors.grey[900],
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -78,7 +78,7 @@ class _SearchViewState extends State<SearchView> {
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return Card(
-                      color: Colors.grey[900],
+                      color: Colors.grey[800],
                       margin: EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

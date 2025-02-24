@@ -16,7 +16,8 @@ class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
     return Container(
       width: size.width * 1,
       height: size.height * 0.2,
-      margin: const EdgeInsets.symmetric(horizontal: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 12)
+          .copyWith(left: 0, bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),

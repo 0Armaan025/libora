@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 
-class ContinueReadingTile extends StatefulWidget {
+class ContinueReadingTile extends StatelessWidget {
   final String imageUrl;
   final String bookName;
   final String authorName;
@@ -15,18 +15,16 @@ class ContinueReadingTile extends StatefulWidget {
   });
 
   @override
-  State<ContinueReadingTile> createState() => _ContinueReadingTileState();
-}
-
-class _ContinueReadingTileState extends State<ContinueReadingTile> {
-  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Container(
-      width: size.width * 0.8,
-      height: size.height * 0.17,
-      margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
-      padding: const EdgeInsets.all(8),
+      width: size.width * 0.9, // More flexible width
+      margin: EdgeInsets.symmetric(
+        vertical: size.height * 0.02,
+        horizontal: size.width * 0.04,
+      ),
+      padding: EdgeInsets.all(size.width * 0.03),
       decoration: BoxDecoration(
         color: HexColor("#fffeff"),
         borderRadius: BorderRadius.circular(26),
@@ -39,63 +37,60 @@ class _ContinueReadingTileState extends State<ContinueReadingTile> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: size.height * 0.04, // Set explicit height for image
-            width: size.width * 0.2, // Set explicit width
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage('https://picsum.photos/200'),
-                fit: BoxFit.cover,
-              ),
+          // Book Cover
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              imageUrl,
+              width: size.width * 0.25, // Scales with screen width
+              height: size.height * 0.15, // Scales with screen height
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 12), // Spacer for better layout
+          SizedBox(width: size.width * 0.04), // Dynamic spacing
+
+          // Book Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // verticl spacer
-
-                const SizedBox(
-                  height: 15,
-                ),
                 Text(
-                  widget.bookName,
+                  bookName,
                   style: GoogleFonts.poppins(
                     color: Colors.black,
-                    fontSize: 22,
+                    fontSize: size.width * 0.05, // Scales with width
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis, // Prevents overflow
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: size.height * 0.005),
+
                 Text(
-                  widget.authorName.toUpperCase(),
+                  authorName.toUpperCase(),
                   style: GoogleFonts.poppins(
                     color: Colors.grey.shade600,
-                    fontSize: 18,
+                    fontSize: size.width * 0.04, // Scales with width
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
+                SizedBox(height: size.height * 0.01),
 
-                const SizedBox(
-                  height: 8,
-                ),
+                // Read Button
                 TextButton.icon(
                   onPressed: () {
-                    // Add your onPressed code here!
+                    // Add navigation or reading functionality here
                   },
-                  icon: Icon(Icons.book, color: Colors.green),
+                  icon: Icon(
+                    Icons.book,
+                    color: Colors.green,
+                    size: size.width * 0.05, // Adaptive icon size
+                  ),
                   label: Text(
                     'Read',
                     style: GoogleFonts.poppins(
                       color: Colors.grey.shade700,
-                      fontSize: 18,
+                      fontSize: size.width * 0.045,
                     ),
                   ),
                   style: TextButton.styleFrom(

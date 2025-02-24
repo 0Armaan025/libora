@@ -15,176 +15,169 @@ class HomePageContent extends StatefulWidget {
 class _HomePageContentState extends State<HomePageContent> {
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-      child: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: size.height * 0.38,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double width = constraints.maxWidth;
+        double height = constraints.maxHeight;
 
-              alignment: Alignment.centerLeft,
-              decoration: BoxDecoration(
-                color: Pallete().buttonColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              // padding: const EdgeInsets.only(left: 20, top: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12.0, top: 18),
-                    child: Row(
+        return SingleChildScrollView(
+          child: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Section
+                Container(
+                  width: double.infinity,
+                  height: height * 0.48,
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                    color: Pallete().buttonColor,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: width * 0.04, vertical: height * 0.02),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(children: [
-                          CircleAvatar(
-                            radius: 25,
-                            backgroundImage:
-                                AssetImage("assets/images/logo.png"),
-                          ),
-                        ]),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12.0),
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: width * 0.07,
+                              backgroundImage: const AssetImage(
+                                  "assets/images/logo.png"), // Adjust logo size
+                            ),
+                            SizedBox(width: width * 0.03),
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "Good evening, Armaan! 👋",
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
-                                    fontSize: 22,
+                                    fontSize: width * 0.05,
                                   ),
                                 ),
                                 Text(
                                   "12th December, 2022",
                                   style: GoogleFonts.poppins(
                                     color: Colors.grey.shade500,
-                                    fontSize: 16,
+                                    fontSize: width * 0.04,
                                   ),
                                 ),
-                              ]),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: height * 0.03),
+                        Text(
+                          "Continue Reading",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: width * 0.06,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        ContinueReadingTile(
+                          imageUrl:
+                              'https://i.pinimg.com/1200x/57/95/44/5795443bab333f614ffd7900defcb61e.jpg',
+                          bookName: "The Literal Prison",
+                          authorName: 'Armaan',
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: size.height * 0.03,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 14),
-                    child: Text(
-                      "Continue Reading",
-                      style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  ContinueReadingTile(
-                      imageUrl:
-                          'https://i.pinimg.com/1200x/57/95/44/5795443bab333f614ffd7900defcb61e.jpg',
-                      bookName: "The literal prison",
-                      authorName: 'Armaan'),
-                ],
-              ),
-            ),
+                ),
 
-            // vertical spacing
+                // Vertical spacing
+                Container(height: height * 0.02, color: HexColor("#f9f5ea")),
 
-            Container(
-              height: size.height * 0.02,
-              color: HexColor("#f9f5ea"),
-            ),
-
-            SizedBox(
-              height: size.height * 0.6,
-              width: double.infinity,
-              child: Container(
-                color: HexColor("#f9f5ea"),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Books(I want y'all to try!)",
+                // Book Recommendation Section
+                Container(
+                  width: double.infinity,
+                  color: HexColor("#f9f5ea"),
+                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(height: height * 0.02),
+                      Text(
+                        "Books (I want y'all to try!)",
                         style: GoogleFonts.poppins(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: width * 0.06,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                    Container(
-                      height: size.height * 0.3,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 5, // Number of books
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: size.width * 0.4,
-                                    height: size.height * 0.2,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            'https://via.placeholder.com/150'), // Replace with your book image URL
-                                        fit: BoxFit.cover,
+                      SizedBox(height: height * 0.02),
+                      SizedBox(
+                        height: height * 0.32,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.only(right: width * 0.04),
+                              child: Container(
+                                width: width * 0.4,
+                                padding: EdgeInsets.all(width * 0.02),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: width * 0.4,
+                                      height: height * 0.2,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        image: const DecorationImage(
+                                          image: NetworkImage(
+                                              'https://cdn-icons-png.flaticon.com/128/1999/1999625.png'),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    "Book Name $index",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.black,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
+                                    SizedBox(height: height * 0.01),
+                                    Text(
+                                      "Book Name $index",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black,
+                                        fontSize: width * 0.045,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    "Author Name",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey.shade700,
-                                      fontSize: 16,
+                                    Text(
+                                      "Author Name",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey.shade700,
+                                        fontSize: width * 0.04,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    ActiveSpacesTile(),
-                  ],
+                      SizedBox(height: height * 0.02),
+                      ActiveSpacesTile(),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
