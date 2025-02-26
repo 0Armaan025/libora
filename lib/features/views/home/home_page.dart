@@ -6,6 +6,7 @@ import 'package:libora/common/common_navbar.dart';
 import 'package:libora/common/continue_reading_tile.dart';
 import 'package:libora/features/views/home/home_page_content.dart';
 import 'package:libora/features/views/search/search_view.dart';
+import 'package:libora/features/views/spaces_view/spaces_view.dart';
 import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/constants.dart';
 import 'package:libora/utils/utils.dart'; // Import constants.dart
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           HomePageContent(), // Page 0
           SearchView(),
-          Container(),
+          SpacesView(),
         ],
       ),
     );
