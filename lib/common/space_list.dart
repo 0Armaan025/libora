@@ -30,7 +30,7 @@ class _SpaceListState extends State<SpaceList> {
           widget.spaceName,
           style: GoogleFonts.poppins(
             color: Colors.black,
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -47,7 +47,7 @@ class _SpaceListState extends State<SpaceList> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: CircleAvatar(
-                  radius: 25,
+                  radius: 20,
                   backgroundImage: NetworkImage(widget.profilePictures[index]),
                 ),
               );

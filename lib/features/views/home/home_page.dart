@@ -4,8 +4,11 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:libora/common/active_space_tile.dart';
 import 'package:libora/common/common_navbar.dart';
 import 'package:libora/common/continue_reading_tile.dart';
+import 'package:libora/features/views/book_community/book_community_view.dart';
+import 'package:libora/features/views/book_info/book_info_view.dart';
 import 'package:libora/features/views/home/home_page_content.dart';
 import 'package:libora/features/views/search/search_view.dart';
+import 'package:libora/features/views/profile/profile_view.dart';
 import 'package:libora/features/views/spaces_view/spaces_view.dart';
 import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/constants.dart';
@@ -43,7 +46,22 @@ class _HomePageState extends State<HomePage> {
         children: [
           HomePageContent(), // Page 0
           SearchView(),
-          SpacesView(),
+          BookDetailScreen(
+            bookName: "The Great Gatsby",
+            authorName: "F. Scott Fitzgerald",
+            description:
+                "The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald. Set in the Jazz Age on Long Island, the novel depicts narrator Nick Carraway's interactions with mysterious millionaire Jay Gatsby and Gatsby's obsession to reunite with his former lover, Daisy Buchanan.",
+            imageUrl:
+                "https://m.media-amazon.com/images/I/71FTb9X6wsL._AC_UF1000,1000_QL80_.jpg",
+          ),
+          ProfilePage(
+            username: "0armaan025", // Change to test with/without DEV badge
+            imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+            followers: 342,
+            following: 167,
+            booksRead: 27,
+            isCurrentUser: true, // Change to false to test follow button
+          ),
         ],
       ),
     );
