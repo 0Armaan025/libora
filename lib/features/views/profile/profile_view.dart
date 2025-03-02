@@ -81,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage>
     super.dispose();
   }
 
-  bool get _isDevUser => _username == "0armaan025";
+  bool get _isDevUser => _username == "0Armaan025";
 
   // Method to handle name change
   void _showChangeNameDialog() {
@@ -344,24 +344,39 @@ class _ProfilePageState extends State<ProfilePage>
           const SizedBox(height: 24),
 
           // Followers & Following
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildStatItem("${widget.followers}", "Followers", palette),
-                Container(
-                  height: 40,
-                  width: 1,
-                  color: Colors.grey[300],
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
+          InkWell(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      "viewing others' followers/following list will come in an update, I thought why would others look at that lol"),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                _buildStatItem("${widget.following}", "Following", palette),
-              ],
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStatItem("${widget.followers}", "Followers", palette),
+                  Container(
+                    height: 40,
+                    width: 1,
+                    color: Colors.grey[300],
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                  ),
+                  _buildStatItem("${widget.following}", "Following", palette),
+                ],
+              ),
             ),
           ),
 

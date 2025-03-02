@@ -27,7 +27,7 @@ class ContinueReadingTile extends StatelessWidget {
       padding: EdgeInsets.all(size.width * 0.03),
       decoration: BoxDecoration(
         color: HexColor("#fffeff"),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -95,6 +95,8 @@ class ContinueReadingTile extends StatelessWidget {
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.transparent,
+                    side: BorderSide(
+                        color: Colors.grey, width: 1), // Thin grey border
                   ),
                 ),
               ],

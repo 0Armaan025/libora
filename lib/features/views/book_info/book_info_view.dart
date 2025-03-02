@@ -202,32 +202,6 @@ class _BookDetailScreenState extends State<BookDetailScreen>
                 ),
                 SizedBox(height: 12),
                 // Genres
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: widget.genres.map((genre) {
-                    return Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.blueAccent.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        genre,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
               ],
             ),
           ),
@@ -481,17 +455,6 @@ class _BookDetailScreenState extends State<BookDetailScreen>
                       ),
                     ),
                     SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "View more books by this author",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -556,7 +519,14 @@ class _BookDetailScreenState extends State<BookDetailScreen>
               ),
             ],
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 8),
+
+          Text(
+            "This is just for testing purposes and might be implemented in future with an additional database if everything goes right and feedback is positive!",
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
+
+          SizedBox(height: 8),
           // Rating overview
           GlassmorphicContainer(
             width: double.infinity,

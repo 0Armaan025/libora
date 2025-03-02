@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:libora/features/views/book_community/book_community_view.dart';
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:libora/utils/utils.dart';
 
 class SpaceList extends StatefulWidget {
   final String spaceName;
@@ -60,18 +62,23 @@ class _SpaceListState extends State<SpaceList> {
         Expanded(
           child: Align(
             alignment: Alignment.centerRight,
-            child: Container(
-              width: size.width * 0.15,
-              height: 40,
-              margin: const EdgeInsets.only(right: 20),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Pallete().buttonColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                "Join",
-                style: GoogleFonts.poppins(color: Colors.white),
+            child: InkWell(
+              onTap: () {
+                moveScreen(context, BookCommunityScreen());
+              },
+              child: Container(
+                width: size.width * 0.15,
+                height: 40,
+                margin: const EdgeInsets.only(right: 20),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Pallete().buttonColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "Join",
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
               ),
             ),
           ),

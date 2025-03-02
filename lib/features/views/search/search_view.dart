@@ -16,51 +16,48 @@ class _UserSearchViewState extends State<UserSearchView> {
   bool _isSearching = false;
   String _searchQuery = "";
 
+  // Track followed users
+  Set<String> followedUsers = {};
+
   // Sample list of users
   final List<Map<String, dynamic>> users = [
     {
-      "username": "emma_design",
-      "name": "Emma Johnson",
+      "name": "0Armaan025",
       "followers": 12542,
       "following": 345,
-      "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+      "avatar": "https://randomuser.me/api/portraits/men/14.jpg",
       "isVerified": true,
     },
     {
-      "username": "alex_photography",
-      "name": "Alex Chen",
+      "name": "alex_photography",
       "followers": 8976,
       "following": 512,
       "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
       "isVerified": false,
     },
     {
-      "username": "sarah_travels",
-      "name": "Sarah Wilson",
+      "name": "sarah_travels",
       "followers": 24681,
       "following": 731,
       "avatar": "https://randomuser.me/api/portraits/women/68.jpg",
       "isVerified": true,
     },
     {
-      "username": "mike_fitness",
-      "name": "Mike Taylor",
+      "name": "mike_fitness",
       "followers": 5823,
       "following": 294,
       "avatar": "https://randomuser.me/api/portraits/men/75.jpg",
       "isVerified": false,
     },
     {
-      "username": "jess_art",
-      "name": "Jessica Reynolds",
+      "name": "jess_art",
       "followers": 15937,
       "following": 420,
       "avatar": "https://randomuser.me/api/portraits/women/90.jpg",
       "isVerified": true,
     },
     {
-      "username": "david_music",
-      "name": "David Parker",
+      "name": "david_music",
       "followers": 3682,
       "following": 186,
       "avatar": "https://randomuser.me/api/portraits/men/41.jpg",
@@ -74,9 +71,7 @@ class _UserSearchViewState extends State<UserSearchView> {
     }
 
     return users.where((user) {
-      return user["username"]
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
+      return user["name"].toLowerCase().contains(_searchQuery.toLowerCase()) ||
           user["name"].toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
@@ -114,6 +109,23 @@ class _UserSearchViewState extends State<UserSearchView> {
     }
   }
 
+  // Function to handle following a user
+  void followUser(String username) {
+    // This is where you would call your API or service
+    print('Following user: $username');
+
+    // Here you can add additional logic like making an API call
+    // For example: ApiService.followUser(username);
+
+    setState(() {
+      if (followedUsers.contains(username)) {
+        followedUsers.remove(username);
+      } else {
+        followedUsers.add(username);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,12 +154,12 @@ class _UserSearchViewState extends State<UserSearchView> {
               padding: EdgeInsets.symmetric(horizontal: _isSearching ? 16 : 12),
               height: 56,
               decoration: BoxDecoration(
-                color: _isSearching ? Colors.grey[900] : Colors.grey[850],
+                color: _isSearching ? Colors.grey[100] : Colors.grey[200],
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: _isSearching
                     ? [
                         BoxShadow(
-                          color: Colors.blueAccent.withOpacity(0.2),
+                          color: Colors.blue.withOpacity(0.2),
                           blurRadius: 8,
                           spreadRadius: 1,
                         )
@@ -155,7 +167,7 @@ class _UserSearchViewState extends State<UserSearchView> {
                     : [],
                 border: Border.all(
                   color: _isSearching
-                      ? Colors.blueAccent.withOpacity(0.5)
+                      ? Colors.blue.withOpacity(0.5)
                       : Colors.transparent,
                   width: 1,
                 ),
@@ -164,7 +176,7 @@ class _UserSearchViewState extends State<UserSearchView> {
                 children: [
                   Icon(
                     Icons.search,
-                    color: _isSearching ? Colors.blueAccent : Colors.white70,
+                    color: _isSearching ? Colors.blue : Colors.grey[700],
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -174,14 +186,14 @@ class _UserSearchViewState extends State<UserSearchView> {
                       decoration: InputDecoration(
                         hintText: "Search for users...",
                         hintStyle: GoogleFonts.poppins(
-                          color: Colors.white60,
+                          color: Colors.grey[600],
                           fontSize: 16,
                         ),
                         border: InputBorder.none,
                         isDense: true,
                       ),
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
+                        color: Colors.black87,
                         fontSize: 16,
                       ),
                     ),
@@ -193,15 +205,13 @@ class _UserSearchViewState extends State<UserSearchView> {
                       },
                       child: Icon(
                         Icons.close,
-                        color: Colors.white70,
+                        color: Colors.grey[700],
                         size: 20,
                       ),
                     ),
                 ],
               ),
             ),
-
-            // Filter Chips
 
             // Results count
             Padding(
@@ -211,7 +221,7 @@ class _UserSearchViewState extends State<UserSearchView> {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white70,
+                  color: Colors.grey[700],
                 ),
               ),
             ),
@@ -244,18 +254,18 @@ class _UserSearchViewState extends State<UserSearchView> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.white70,
+            color: isSelected ? Colors.white : Colors.black87,
           ),
         ),
         selected: isSelected,
-        backgroundColor: Colors.grey[850],
-        selectedColor: Colors.blueAccent.withOpacity(0.3),
-        checkmarkColor: Colors.blueAccent,
+        backgroundColor: Colors.grey[200],
+        selectedColor: Colors.blue.withOpacity(0.2),
+        checkmarkColor: Colors.blue,
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: isSelected ? Colors.blueAccent : Colors.transparent,
+            color: isSelected ? Colors.blue : Colors.transparent,
             width: 1,
           ),
         ),
@@ -267,11 +277,20 @@ class _UserSearchViewState extends State<UserSearchView> {
   }
 
   Widget _buildUserCard(Map<String, dynamic> user, BuildContext context) {
+    final bool isFollowing = followedUsers.contains(user["name"]);
+
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade900,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -282,9 +301,9 @@ class _UserSearchViewState extends State<UserSearchView> {
             // Navigate to user profile
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Viewing ${user['username']}'s profile"),
+                content: Text("Viewing ${user['name']}'s profile"),
                 behavior: SnackBarBehavior.floating,
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -306,7 +325,7 @@ class _UserSearchViewState extends State<UserSearchView> {
                         height: 56,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          color: Colors.grey[800],
+                          color: Colors.grey[300],
                           child: Center(
                             child: SizedBox(
                               width: 24,
@@ -314,24 +333,24 @@ class _UserSearchViewState extends State<UserSearchView> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white70),
+                                    Colors.grey[700]!),
                               ),
                             ),
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[800],
+                          color: Colors.grey[300],
                           child: Center(
                             child: Icon(
                               Icons.person,
-                              color: Colors.white70,
+                              color: Colors.grey[700],
                               size: 32,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    if (user["isVerified"])
+                    if (user["name"] == "0Armaan025")
                       Positioned(
                         right: 0,
                         bottom: 0,
@@ -339,10 +358,10 @@ class _UserSearchViewState extends State<UserSearchView> {
                           width: 18,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent,
+                            color: Colors.blue,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.black,
+                              color: Colors.white,
                               width: 2,
                             ),
                           ),
@@ -367,47 +386,28 @@ class _UserSearchViewState extends State<UserSearchView> {
                       Row(
                         children: [
                           Text(
-                            user["username"],
+                            user["name"],
                             style: GoogleFonts.poppins(
-                              fontSize: 16,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: Colors.black87,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(width: 6),
-                          if (user["isVerified"])
+                          if (user["name"] == "0Armaan025")
                             Icon(
                               Icons.verified,
-                              color: Colors.blueAccent,
+                              color: Colors.blue,
                               size: 16,
                             ),
                         ],
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        user["name"],
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white70,
-                        ),
                       ),
                       SizedBox(height: 4),
                       Row(
                         children: [
                           _buildFollowInfo(
                               formatFollowers(user["followers"]), "followers"),
-                          Container(
-                            width: 4,
-                            height: 4,
-                            margin: EdgeInsets.symmetric(horizontal: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white38,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          _buildFollowInfo(
-                              user["following"].toString(), "following"),
                         ],
                       ),
                     ],
@@ -417,11 +417,17 @@ class _UserSearchViewState extends State<UserSearchView> {
                 // Follow Button
                 TextButton(
                   onPressed: () {
+                    // Call the followUser function and pass the username
+                    followUser(user["name"]);
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Following ${user['username']}"),
+                        content: Text(isFollowing
+                            ? "Unfollowed ${user['name']}"
+                            : "Following ${user['name']}"),
                         behavior: SnackBarBehavior.floating,
-                        backgroundColor: Colors.green,
+                        backgroundColor:
+                            isFollowing ? Colors.grey : Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -429,7 +435,8 @@ class _UserSearchViewState extends State<UserSearchView> {
                     );
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor:
+                        isFollowing ? Colors.grey[200] : Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -440,11 +447,11 @@ class _UserSearchViewState extends State<UserSearchView> {
                     minimumSize: Size(0, 0),
                   ),
                   child: Text(
-                    "Follow",
+                    isFollowing ? "Following" : "Follow",
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: isFollowing ? Colors.black87 : Colors.white,
                     ),
                   ),
                 ),
@@ -462,9 +469,9 @@ class _UserSearchViewState extends State<UserSearchView> {
         Text(
           count,
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: Colors.black87,
           ),
         ),
         SizedBox(width: 4),
@@ -473,7 +480,7 @@ class _UserSearchViewState extends State<UserSearchView> {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w400,
-            color: Colors.white60,
+            color: Colors.grey[600],
           ),
         ),
       ],
@@ -488,7 +495,7 @@ class _UserSearchViewState extends State<UserSearchView> {
           Icon(
             Icons.search_off,
             size: 80,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.grey.withOpacity(0.5),
           ),
           SizedBox(height: 16),
           Text(
@@ -496,7 +503,7 @@ class _UserSearchViewState extends State<UserSearchView> {
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Colors.black87,
             ),
           ),
           SizedBox(height: 8),
@@ -505,7 +512,7 @@ class _UserSearchViewState extends State<UserSearchView> {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: Colors.white60,
+              color: Colors.grey[600],
             ),
           ),
         ],

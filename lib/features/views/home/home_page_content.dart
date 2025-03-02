@@ -137,7 +137,6 @@ class _HomePageContentState extends State<HomePageContent> {
                                       width: width * 0.4,
                                       height: height * 0.2,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
                                         image: const DecorationImage(
                                           image: NetworkImage(
                                               'https://cdn-icons-png.flaticon.com/128/1999/1999625.png'),

@@ -113,7 +113,7 @@ class _SpacesViewState extends State<SpacesView> {
                   children: [
                     // Section header
                     Text(
-                      "Your Spaces",
+                      "Spaces right now",
                       style: GoogleFonts.poppins(
                         color: Colors.black,
                         fontSize: 18,
