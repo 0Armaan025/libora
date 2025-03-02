@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:hexcolor/hexcolor.dart';
-import 'package:libora/utils/constants.dart';
 
 class CommonNavbar extends StatefulWidget {
   final int selectedIndex;

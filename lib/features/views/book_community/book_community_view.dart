@@ -120,7 +120,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   }
 
   Widget _buildCommunityCard(Map<String, dynamic> member) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.5,
       child: Card(
         elevation: 1,

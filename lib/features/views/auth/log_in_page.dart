@@ -14,7 +14,7 @@ class LogInPage extends StatefulWidget {
 
 class _LogInPageState extends State<LogInPage> {
   bool _isObscure = true;
-  bool _isAccepted = false;
+  final bool _isAccepted = false;
 
   @override
   Widget build(BuildContext context) {

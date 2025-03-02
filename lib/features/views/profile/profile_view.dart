@@ -12,14 +12,14 @@ class ProfilePage extends StatefulWidget {
   final bool isCurrentUser;
 
   const ProfilePage({
-    Key? key,
+    super.key,
     required this.username,
     required this.imageUrl,
     required this.followers,
     required this.following,
     required this.booksRead,
     required this.isCurrentUser,
-  }) : super(key: key);
+  });
 
   @override
   _ProfilePageState createState() => _ProfilePageState();

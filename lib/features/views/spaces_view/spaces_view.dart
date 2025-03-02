@@ -260,7 +260,7 @@ class _SpacesViewState extends State<SpacesView> {
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Container(
+            child: SizedBox(
               height: 200,
               width: 200,
               child: Column(

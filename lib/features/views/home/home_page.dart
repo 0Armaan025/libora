@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:libora/common/active_space_tile.dart';
 import 'package:libora/common/common_navbar.dart';
-import 'package:libora/common/continue_reading_tile.dart';
-import 'package:libora/features/views/book_community/book_community_view.dart';
 import 'package:libora/features/views/book_info/book_info_view.dart';
 import 'package:libora/features/views/home/home_page_content.dart';
 import 'package:libora/features/views/search/search_view.dart';
 import 'package:libora/features/views/profile/profile_view.dart';
-import 'package:libora/features/views/spaces_view/spaces_view.dart';
-import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/constants.dart';
 import 'package:libora/utils/utils.dart'; // Import constants.dart
 
@@ -45,7 +39,7 @@ class _HomePageState extends State<HomePage> {
         index: selectedIndex,
         children: [
           HomePageContent(), // Page 0
-          SearchView(),
+          UserSearchView(),
           BookDetailScreen(
             bookName: "The Great Gatsby",
             authorName: "F. Scott Fitzgerald",
