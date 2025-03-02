@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:libora/features/models/User.dart';
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:libora/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSearchView extends StatefulWidget {
   const UserSearchView({super.key});
@@ -15,65 +21,71 @@ class _UserSearchViewState extends State<UserSearchView> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   String _searchQuery = "";
+  bool _isLoading = false;
 
   // Track followed users
   Set<String> followedUsers = {};
 
-  // Sample list of users
-  final List<Map<String, dynamic>> users = [
-    {
-      "name": "0Armaan025",
-      "followers": 12542,
-      "following": 345,
-      "avatar": "https://randomuser.me/api/portraits/men/14.jpg",
-      "isVerified": true,
-    },
-    {
-      "name": "alex_photography",
-      "followers": 8976,
-      "following": 512,
-      "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
-      "isVerified": false,
-    },
-    {
-      "name": "sarah_travels",
-      "followers": 24681,
-      "following": 731,
-      "avatar": "https://randomuser.me/api/portraits/women/68.jpg",
-      "isVerified": true,
-    },
-    {
-      "name": "mike_fitness",
-      "followers": 5823,
-      "following": 294,
-      "avatar": "https://randomuser.me/api/portraits/men/75.jpg",
-      "isVerified": false,
-    },
-    {
-      "name": "jess_art",
-      "followers": 15937,
-      "following": 420,
-      "avatar": "https://randomuser.me/api/portraits/women/90.jpg",
-      "isVerified": true,
-    },
-    {
-      "name": "david_music",
-      "followers": 3682,
-      "following": 186,
-      "avatar": "https://randomuser.me/api/portraits/men/41.jpg",
-      "isVerified": false,
-    },
-  ];
+  // List to store API results
+  List<UserModel> _users = [];
 
-  List<Map<String, dynamic>> get filteredUsers {
-    if (_searchQuery.isEmpty) {
-      return users;
+  Future<void> searchUsers(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _users = [];
+      });
+      return;
     }
 
-    return users.where((user) {
-      return user["name"].toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          user["name"].toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    setState(() {
+      _isLoading = true;
+    });
+
+    final url = Uri.parse(
+        'https://libora-api.onrender.com/api/user/search-users?query=$query');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        List users = data['users'];
+
+        if (users.isEmpty) {
+          if (mounted) showSnackBar(context, "No users found.");
+          setState(() {
+            _users = [];
+            _isLoading = false;
+          });
+        } else {
+          if (mounted) showSnackBar(context, "Found ${users.length} users.");
+
+          List<UserModel> usersList = [];
+          for (var user in users) {
+            usersList.add(UserModel.fromJson(user));
+          }
+
+          setState(() {
+            _users = usersList;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) showSnackBar(context, "Error: ${response.body}");
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted)
+        showSnackBar(context, 'Error occurred :(, please contact Armaan!');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -110,20 +122,94 @@ class _UserSearchViewState extends State<UserSearchView> {
   }
 
   // Function to handle following a user
-  void followUser(String username) {
-    // This is where you would call your API or service
-    print('Following user: $username');
+  Future<void> followUser(String username) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Here you can add additional logic like making an API call
-    // For example: ApiService.followUser(username);
+      final currentUserName =
+          prefs.getString("name"); 
 
-    setState(() {
-      if (followedUsers.contains(username)) {
-        followedUsers.remove(username);
+      
+      setState(() {
+        if (followedUsers.contains(username)) {
+          followedUsers.remove(username);
+        } else {
+          followedUsers.add(username);
+        }
+      });
+
+      final isFollowing = followedUsers.contains(username);
+
+      
+      final url =
+          Uri.parse('https://libora-api.onrender.com/api/user/update-user');
+
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "name": currentUserName, // Current user's name
+          "updates": {
+            // If following, add the username to the following array, otherwise remove it
+            "following":
+                isFollowing ? {"\$addToSet": username} : {"\$pull": username}
+          }
+        }),
+      );
+
+      // Now update the target user's followers list
+      await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "name": username, // Target user's name
+          "updates": {
+            // If following, add current user to followers array, otherwise remove
+            "followers": isFollowing
+                ? {"\$addToSet": currentUserName}
+                : {"\$pull": currentUserName}
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          showSnackBar(
+              context,
+              isFollowing
+                  ? "Following $username successfully"
+                  : "Unfollowed $username successfully");
+        }
       } else {
-        followedUsers.add(username);
+        // API call failed
+        if (mounted) {
+          showSnackBar(context, "Failed to update following status");
+        }
+
+        // Revert UI change
+        setState(() {
+          if (followedUsers.contains(username)) {
+            followedUsers.remove(username);
+          } else {
+            followedUsers.add(username);
+          }
+        });
       }
-    });
+    } catch (e) {
+      // Error occurred
+      if (mounted) {
+        showSnackBar(context, 'Error occurred: ${e.toString()}');
+      }
+
+      // Revert UI change
+      setState(() {
+        if (followedUsers.contains(username)) {
+          followedUsers.remove(username);
+        } else {
+          followedUsers.add(username);
+        }
+      });
+    }
   }
 
   @override
@@ -196,12 +282,19 @@ class _UserSearchViewState extends State<UserSearchView> {
                         color: Colors.black87,
                         fontSize: 16,
                       ),
+                      onSubmitted: (value) {
+                        // Trigger search when user presses enter
+                        searchUsers(value);
+                      },
                     ),
                   ),
                   if (_searchController.text.isNotEmpty)
                     GestureDetector(
                       onTap: () {
                         _searchController.clear();
+                        setState(() {
+                          _users = [];
+                        });
                       },
                       child: Icon(
                         Icons.close,
@@ -209,6 +302,25 @@ class _UserSearchViewState extends State<UserSearchView> {
                         size: 20,
                       ),
                     ),
+                  // Search button
+                  GestureDetector(
+                    onTap: () {
+                      searchUsers(_searchController.text);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 8),
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -217,7 +329,9 @@ class _UserSearchViewState extends State<UserSearchView> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Text(
-                "${filteredUsers.length} ${filteredUsers.length == 1 ? 'user' : 'users'} found",
+                _isLoading
+                    ? "Searching..."
+                    : "${_users.length} ${_users.length == 1 ? 'user' : 'users'} found",
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -228,16 +342,18 @@ class _UserSearchViewState extends State<UserSearchView> {
 
             // Users List
             Expanded(
-              child: filteredUsers.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: filteredUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = filteredUsers[index];
-                        return _buildUserCard(user, context);
-                      },
-                    ),
+              child: _isLoading
+                  ? _buildLoadingState()
+                  : _users.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: _users.length,
+                          itemBuilder: (context, index) {
+                            final user = _users[index];
+                            return _buildUserCard(user, context);
+                          },
+                        ),
             ),
           ],
         ),
@@ -245,39 +361,10 @@ class _UserSearchViewState extends State<UserSearchView> {
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      margin: EdgeInsets.only(right: 10),
-      child: FilterChip(
-        label: Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.black87,
-          ),
-        ),
-        selected: isSelected,
-        backgroundColor: Colors.grey[200],
-        selectedColor: Colors.blue.withOpacity(0.2),
-        checkmarkColor: Colors.blue,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected ? Colors.blue : Colors.transparent,
-            width: 1,
-          ),
-        ),
-        onSelected: (bool selected) {
-          // Handle filter selection
-        },
-      ),
-    );
-  }
-
-  Widget _buildUserCard(Map<String, dynamic> user, BuildContext context) {
-    final bool isFollowing = followedUsers.contains(user["name"]);
+  Widget _buildUserCard(UserModel user, BuildContext context) {
+    final bool isFollowing = followedUsers.contains(user.name);
+    final String avatarUrl =
+        user.profileImage ?? "https://randomuser.me/api/portraits/lego/1.jpg";
 
     return Container(
       margin: EdgeInsets.only(bottom: 12),
@@ -301,7 +388,7 @@ class _UserSearchViewState extends State<UserSearchView> {
             // Navigate to user profile
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Viewing ${user['name']}'s profile"),
+                content: Text("Viewing ${user.name}'s profile"),
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -309,72 +396,48 @@ class _UserSearchViewState extends State<UserSearchView> {
                 ),
               ),
             );
+            // Here you would navigate to the user profile
+            // Navigator.push(context, MaterialPageRoute(
+            //   builder: (context) => UserProfileScreen(userId: user.id),
+            // ));
           },
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                // Avatar with online indicator
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: CachedNetworkImage(
-                        imageUrl: user["avatar"],
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.grey[700]!),
-                              ),
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(
-                              Icons.person,
-                              color: Colors.grey[700],
-                              size: 32,
-                            ),
+                // Avatar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: CachedNetworkImage(
+                    imageUrl: avatarUrl,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.grey[700]!),
                           ),
                         ),
                       ),
                     ),
-                    if (user["name"] == "0Armaan025")
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 12,
-                            ),
-                          ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.grey[700],
+                          size: 32,
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
                 SizedBox(width: 16),
 
@@ -386,16 +449,16 @@ class _UserSearchViewState extends State<UserSearchView> {
                       Row(
                         children: [
                           Text(
-                            user["name"],
+                            user.name,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(width: 6),
-                          if (user["name"] == "0Armaan025")
+                          if (user.name == "0Armaan025")
                             Icon(
                               Icons.verified,
                               color: Colors.blue,
@@ -404,12 +467,22 @@ class _UserSearchViewState extends State<UserSearchView> {
                         ],
                       ),
                       SizedBox(height: 4),
-                      Row(
-                        children: [
-                          _buildFollowInfo(
-                              formatFollowers(user["followers"]), "followers"),
-                        ],
+                      Text(
+                        user.name ??
+                            "@" + user.name.toLowerCase().replaceAll(" ", "_"),
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600],
+                        ),
                       ),
+                      if (user.followers != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: _buildFollowInfo(
+                              formatFollowers(user.followers.length!),
+                              "followers"),
+                        ),
                     ],
                   ),
                 ),
@@ -417,14 +490,14 @@ class _UserSearchViewState extends State<UserSearchView> {
                 // Follow Button
                 TextButton(
                   onPressed: () {
-                    // Call the followUser function and pass the username
-                    followUser(user["name"]);
+                    // Call the followUser function and pass the user ID
+                    followUser(user.name);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(isFollowing
-                            ? "Unfollowed ${user['name']}"
-                            : "Following ${user['name']}"),
+                            ? "Unfollowed ${user.name}"
+                            : "Following ${user.name}"),
                         behavior: SnackBarBehavior.floating,
                         backgroundColor:
                             isFollowing ? Colors.grey : Colors.green,
@@ -469,7 +542,7 @@ class _UserSearchViewState extends State<UserSearchView> {
         Text(
           count,
           style: GoogleFonts.poppins(
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
@@ -499,7 +572,7 @@ class _UserSearchViewState extends State<UserSearchView> {
           ),
           SizedBox(height: 16),
           Text(
-            "No users found",
+            _searchQuery.isEmpty ? "Search for users" : "No users found",
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -508,11 +581,35 @@ class _UserSearchViewState extends State<UserSearchView> {
           ),
           SizedBox(height: 8),
           Text(
-            "Try a different search term",
+            _searchQuery.isEmpty
+                ? "Type a name to find users"
+                : "Try a different search term",
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Searching for users...",
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
             ),
           ),
         ],

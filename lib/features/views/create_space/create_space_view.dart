@@ -1,90 +1,144 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hexcolor/hexcolor.dart';
+import 'package:libora/features/repositories/space_repository.dart';
+import 'package:libora/features/views/book_community/book_community_view.dart';
+import 'package:libora/utils/theme/Pallete.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateSpaceScreen extends StatefulWidget {
   const CreateSpaceScreen({super.key});
 
   @override
-  State<CreateSpaceScreen> createState() => _CreateSpaceScreenState();
+  State createState() => _CreateSpaceScreenState();
 }
 
-class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
+class _CreateSpaceScreenState extends State {
   final _spaceNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   String? _spaceCode;
+  bool _isLoading = false;
+  final ApiService _apiService = ApiService();
 
-  void _createSpace() {
-    if (_spaceNameController.text.isEmpty) {
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  Future _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameController.text = prefs.getString('username') ?? '';
+    });
+  }
+
+  Future _saveUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', _usernameController.text);
+  }
+
+  void _createSpace() async {
+    if (_spaceNameController.text.isEmpty || _usernameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a space name")),
+        const SnackBar(
+            content: Text("Please enter both space name and your name")),
       );
       return;
     }
 
-    // Generate a random 3-digit code
-    final randomCode = (100 + (DateTime.now().millisecond % 900)).toString();
     setState(() {
-      _spaceCode = randomCode;
+      _isLoading = true;
     });
 
-    // Show success dialog with the space code
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          "Space Created!",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Your space code is:",
-              style: GoogleFonts.poppins(),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _spaceCode!,
-              style: GoogleFonts.poppins(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: HexColor("#3e7bfa"),
+    try {
+      // Generate a random 3-digit code
+      final randomCode = (100 + (DateTime.now().millisecond % 900)).toString();
+
+      // Save username for future use
+      await _saveUsername();
+
+      // Create space on the server
+      final space = await _apiService.createSpace(
+        _spaceNameController.text,
+        _usernameController.text,
+        randomCode,
+      );
+
+      setState(() {
+        _spaceCode = randomCode;
+        _isLoading = false;
+      });
+
+      // Show success dialog with the space code
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            "Space Created!",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Your space code is:",
+                style: GoogleFonts.poppins(),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Share this code with others to join your space.",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey[600],
+              const SizedBox(height: 8),
+              Text(
+                _spaceCode!,
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-              textAlign: TextAlign.center,
+              const SizedBox(height: 16),
+              Text(
+                "Share this code with others to join your space.",
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Navigate to space detail screen
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookCommunityScreen(),
+                  ),
+                );
+              },
+              child: Text(
+                "Enter Space",
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context); // Return to the previous screen
-            },
-            child: Text(
-              "Done",
-              style: GoogleFonts.poppins(
-                color: HexColor("#3e7bfa"),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error creating space: $e")),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = HexColor("#3e7bfa");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -94,15 +148,38 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Pallete().bgColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: primaryColor),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "Your Name",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                hintText: "Enter your name",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
               "Space Name",
               style: GoogleFonts.poppins(
@@ -121,7 +198,7 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: primaryColor),
+                  borderSide: BorderSide(color: Colors.black),
                 ),
               ),
             ),
@@ -129,22 +206,24 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _createSpace,
+                onPressed: _isLoading ? null : _createSpace,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  "Create Space",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "Create Space",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

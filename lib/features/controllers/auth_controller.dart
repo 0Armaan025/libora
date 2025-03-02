@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:libora/features/models/User.dart';
 import 'package:libora/features/repositories/auth_repository.dart';
 
 class AuthController {
   final AuthRepository _authRepository = AuthRepository();
 
-  Future<void> signUp(BuildContext context, String name, String pass, String profileImage) async {
+  Future<void> signUp(BuildContext context, String name, String pass,
+      String profileImage) async {
     try {
       await _authRepository.signUp(name, pass, context, profileImage);
     } catch (e) {
@@ -23,6 +25,15 @@ class AuthController {
   Future<void> getUserDetails(BuildContext context) async {
     try {
       await _authRepository.getUserData(context);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> searchUsers(
+      BuildContext context, String query) async {
+    try {
+      return await _authRepository.searchUsers(context, query);
     } catch (e) {
       rethrow;
     }

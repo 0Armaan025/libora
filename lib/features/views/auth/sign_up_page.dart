@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/common/common_auth_btn.dart';
+import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/views/auth/log_in_page.dart';
 import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/utils.dart';
@@ -8,7 +9,7 @@ import 'package:libora/utils/utils.dart';
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
-  @override 
+  @override
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
@@ -18,6 +19,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _isObscure = true;
   bool _isAccepted = false;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   // List of avatars (Replace with your own image URLs if needed)
   final List<String> avatarOptions = [
@@ -33,8 +37,11 @@ class _SignUpPageState extends State<SignUpPage> {
     'https://cdn-icons-png.flaticon.com/128/706/706830.png',
   ];
 
-  void signUp(BuildContext context, String username, String password) {
-    
+  void signUp(BuildContext context, String username, String password) async {
+    AuthController _controller = AuthController();
+
+    await _controller.signUp(context, _nameController.text,
+        _passwordController.text, selectedAvatar);
   }
 
   void _showAvatarSelection() {
@@ -86,6 +93,14 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
   }
 
   @override
@@ -156,6 +171,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8),
                 child: TextFormField(
+                  controller: _nameController,
                   style: GoogleFonts.poppins(),
                   decoration: InputDecoration(
                     hintText: "Enter your username",
@@ -204,6 +220,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8),
                 child: TextFormField(
+                  controller: _passwordController,
                   obscureText: _isObscure,
                   style: GoogleFonts.poppins(),
                   decoration: InputDecoration(

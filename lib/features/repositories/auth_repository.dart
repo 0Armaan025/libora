@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:libora/features/models/User.dart';
 import 'package:libora/features/views/home/home_page.dart';
 import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,6 +71,44 @@ class AuthRepository {
       } catch (e) {
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');
       }
+    }
+  }
+
+  Future<List<UserModel>> searchUsers(
+      BuildContext context, String query) async {
+    final url = Uri.parse(
+        'https://libora-api.onrender.com/api/user/search-users?query=$query');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        List<dynamic> users = data['users'];
+
+        if (users.isEmpty) {
+          if (context.mounted) showSnackBar(context, "No users found.");
+          return [];
+        } else {
+          if (context.mounted)
+            showSnackBar(context, "Found ${users.length} users.");
+          List<UserModel> usersList = [];
+          for (var user in users) {
+            usersList.add(UserModel.fromJson(user));
+          }
+          return usersList;
+        }
+      } else {
+        if (context.mounted) showSnackBar(context, "Error: ${response.body}");
+        return [];
+      }
+    } catch (e) {
+      if (context.mounted)
+        showSnackBar(context, 'Error occurred :(, please contact Armaan!');
+      return [];
     }
   }
 }
