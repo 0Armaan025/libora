@@ -6,13 +6,15 @@ import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
-  Future<void> signUp(String name, String pass, BuildContext context) async {
+  Future<void> signUp(String name, String pass, BuildContext context,
+      String profileImage) async {
     final url = Uri.parse('https://libora-api.onrender.com/api/user/register');
 
     try {
       final response = await http.post(url,
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode({"name": name, "password": pass}));
+          body: jsonEncode(
+              {"name": name, "password": pass, "profileImage": profileImage}));
 
       if (response.statusCode == 200) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();

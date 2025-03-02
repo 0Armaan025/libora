@@ -4,9 +4,9 @@ import 'package:libora/features/repositories/auth_repository.dart';
 class AuthController {
   final AuthRepository _authRepository = AuthRepository();
 
-  Future<void> signUp(BuildContext context, String name, String pass) async {
+  Future<void> signUp(BuildContext context, String name, String pass, String profileImage) async {
     try {
-      await _authRepository.signUp(name, pass, context);
+      await _authRepository.signUp(name, pass, context, profileImage);
     } catch (e) {
       rethrow;
     }

@@ -8,7 +8,7 @@ import 'package:libora/utils/utils.dart';
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
-  @override
+  @override 
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
@@ -32,6 +32,10 @@ class _SignUpPageState extends State<SignUpPage> {
     'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
     'https://cdn-icons-png.flaticon.com/128/706/706830.png',
   ];
+
+  void signUp(BuildContext context, String username, String password) {
+    
+  }
 
   void _showAvatarSelection() {
     showModalBottomSheet(
