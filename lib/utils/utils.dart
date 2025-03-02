@@ -26,3 +26,11 @@ AppBar buildAppBar(String title) {
     centerTitle: true,
   );
 }
+
+showSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+    ),
+  );
+}

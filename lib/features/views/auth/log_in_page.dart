@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/common/common_auth_btn.dart';
 import 'package:libora/features/views/auth/sign_up_page.dart';
-import 'package:libora/utils/theme/Pallete.dart';
 import 'package:libora/utils/utils.dart';
 
 class LogInPage extends StatefulWidget {

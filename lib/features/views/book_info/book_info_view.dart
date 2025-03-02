@@ -15,7 +15,7 @@ class BookDetailScreen extends StatefulWidget {
   final String publishDate;
 
   const BookDetailScreen({
-    Key? key,
+    super.key,
     required this.bookName,
     required this.authorName,
     required this.description,
@@ -24,7 +24,7 @@ class BookDetailScreen extends StatefulWidget {
     this.genres = const ['Fiction', 'Fantasy'],
     this.pageCount = 320,
     this.publishDate = 'Jan 2023',
-  }) : super(key: key);
+  });
 
   @override
   State<BookDetailScreen> createState() => _BookDetailScreenState();
@@ -402,7 +402,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
                 ],
               ),
             );
-          }).toList(),
+          }),
           SizedBox(height: 24),
           Text(
             "About the Author",
@@ -689,7 +689,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
                 ],
               ),
             );
-          }).toList(),
+          }),
           Center(
             child: TextButton(
               onPressed: () {},

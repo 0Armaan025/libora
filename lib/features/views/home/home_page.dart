@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:libora/common/common_navbar.dart';
-import 'package:libora/features/views/book_info/book_info_view.dart';
 import 'package:libora/features/views/home/home_page_content.dart';
 import 'package:libora/features/views/search/search_view.dart';
 import 'package:libora/features/views/profile/profile_view.dart';
