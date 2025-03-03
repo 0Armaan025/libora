@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:libora/common/active_space_tile.dart';
 import 'package:libora/common/continue_reading_tile.dart';
+import 'package:intl/intl.dart'; // Import this
+import 'package:libora/features/controllers/auth_controller.dart';
+
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
@@ -13,6 +17,60 @@ class HomePageContent extends StatefulWidget {
 }
 
 class _HomePageContentState extends State<HomePageContent> {
+  String username = "";
+  String formattedDate = ""; // Store the formatted date
+  String greeting = "";
+  String profileImage = "";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserName();
+    getCurrentDate(); // Call function to format date
+  }
+
+  void getCurrentDate() {
+    DateTime now = DateTime.now();
+
+    // Format date & time (Example: "03 March, 2025 | 09:15 AM")
+    String formattedDateTime =
+        DateFormat("dd MMMM, yyyy | hh:mm a").format(now);
+
+    // Determine greeting based on hour
+    int hour = now.hour;
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good Morning";
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "Good Afternoon";
+    } else {
+      greeting = "Good Evening";
+    }
+
+    setState(() {
+      formattedDate = formattedDateTime;
+    });
+  }
+
+  getUserName() {
+    getTheDamnName();
+  }
+
+  getTheDamnName() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('name');
+    setState(() {
+      username = name!;
+    });
+
+    AuthController controller = AuthController();
+    final user = await controller.getUserDetails(context, username);
+    setState(() {
+      profileImage = user?['user']?['profile_image'] ?? '';
+      print('profile image is $profileImage');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -56,14 +114,14 @@ class _HomePageContentState extends State<HomePageContent> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Good evening, Armaan! 👋",
+                                  "$greeting, ${username.isNotEmpty ? username : 'User'}! 👋",
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
-                                    fontSize: width * 0.05,
+                                    fontSize: width * 0.046,
                                   ),
                                 ),
                                 Text(
-                                  "12th December, 2022",
+                                  formattedDate,
                                   style: GoogleFonts.poppins(
                                     color: Colors.grey.shade500,
                                     fontSize: width * 0.04,
@@ -137,9 +195,8 @@ class _HomePageContentState extends State<HomePageContent> {
                                       width: width * 0.4,
                                       height: height * 0.2,
                                       decoration: BoxDecoration(
-                                        image: const DecorationImage(
-                                          image: NetworkImage(
-                                              'https://cdn-icons-png.flaticon.com/128/1999/1999625.png'),
+                                        image: DecorationImage(
+                                          image: NetworkImage(profileImage),
                                           fit: BoxFit.cover,
                                         ),
                                       ),

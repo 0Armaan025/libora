@@ -335,7 +335,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         child: FloatingActionButton(
           onPressed: () {
             // Navigate to messaging screen
-            moveScreen(context, GroupChatScreen(spaceName: "active space"));
+            moveScreen(context,
+                GroupChatScreen(spaceName: "active space", code: widget.code));
           },
           backgroundColor: Colors.blue,
           elevation: 3,
@@ -537,7 +538,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           Padding(
             padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
             child: Text(
-              _searchQuery.isEmpty ? "Popular Books" : "Search Results",
+              _searchQuery.isEmpty ? "" : "Search Results",
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -548,22 +549,56 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
           // Book Grid
           Expanded(
-            child: filteredBooks.isEmpty
-                ? _buildEmptyState()
-                : GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.65, // Taller for book covers
-                    ),
-                    itemCount: filteredBooks.length,
-                    itemBuilder: (context, index) {
-                      final book = filteredBooks[index];
-                      return _buildBookCard(book);
-                    },
-                  ),
+            child: _searchQuery.isEmpty
+                ? _buildEmptySearchState() // New empty state when no search
+                : filteredBooks.isEmpty
+                    ? _buildEmptyState() // Your existing empty state for no results
+                    : GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.65,
+                        ),
+                        itemCount: filteredBooks.length,
+                        itemBuilder: (context, index) {
+                          final book = filteredBooks[index];
+                          return _buildBookCard(book);
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptySearchState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Search for books",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Enter a book title or author name",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
