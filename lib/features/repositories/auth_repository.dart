@@ -52,9 +52,16 @@ class AuthRepository {
     }
   }
 
-  Future<void> getUserData(BuildContext context) async {
+  Future<void> getUserData(BuildContext context, String givenName) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? name = prefs.getString("name");
+
+    String? name = "";
+
+    if (givenName == "") {
+      name = prefs.getString("name");
+    } else {
+      name = givenName;
+    }
 
     if (name == null) {
       showSnackBar(context,

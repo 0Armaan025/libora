@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Message.dart';
@@ -72,6 +73,11 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final username = await prefs.getString('name');
+      final spaceName = await prefs.setString("space_name", "");
+      final spaceCode = await prefs.setString("space_code", "");
+      final inSpace = await prefs.setBool("in_space", false);
       return true;
     } else {
       throw Exception('Failed to leave space: ${response.body}');
@@ -118,6 +124,30 @@ class ApiService {
       return messages;
     } else {
       throw Exception('Failed to get people: ${response.body}');
+    }
+  }
+
+  Future<List<Space>> getActiveSpaces(BuildContext context) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/space/get'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    print("response: ${response.body}");
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      List<Space> spaces = [];
+
+      if (data['spaces'] != null) {
+        for (var space in data['spaces']) {
+          // Create Space object using your factory method
+          spaces.add(Space.fromJson(space));
+        }
+      }
+
+      return spaces;
+    } else {
+      throw Exception('Failed to get active spaces: ${response.body}');
     }
   }
 

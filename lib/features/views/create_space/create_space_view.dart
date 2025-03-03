@@ -120,7 +120,9 @@ class _CreateSpaceScreenState extends State {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BookCommunityScreen(),
+                    builder: (context) => BookCommunityScreen(
+                      code: _spaceCode!,
+                    ),
                   ),
                 );
               },

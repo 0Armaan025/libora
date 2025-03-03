@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:libora/common/space_list.dart';
+import 'package:libora/features/models/Space.dart';
+import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/create_space/create_space_view.dart';
 import 'package:libora/features/views/join_space/join_space_view.dart';
 import 'package:libora/utils/utils.dart';
@@ -15,34 +17,27 @@ class SpacesView extends StatefulWidget {
 
 class _SpacesViewState extends State<SpacesView> {
   // Sample data for spaces
-  final List<Map<String, dynamic>> spaces = [
-    {
-      "name": "Book Club",
-      "members": 8,
-      "profiles": [
-        "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
-        "https://cdn-icons-png.flaticon.com/128/4140/4140048.png",
-      ],
-      "lastActive": "2 min ago"
-    },
-    {
-      "name": "Study Group",
-      "members": 12,
-      "profiles": [
-        "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
-        "https://cdn-icons-png.flaticon.com/128/4140/4140048.png",
-      ],
-      "lastActive": "5 min ago"
-    },
-    {
-      "name": "Research Team",
-      "members": 5,
-      "profiles": [
-        "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
-      ],
-      "lastActive": "1 hour ago"
-    },
-  ];
+  List<dynamic> spaces = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getSpaceData();
+  }
+
+  getSpaceData() {
+    getData();
+  }
+
+  getData() async {
+    ApiService service = ApiService();
+    final data = await service.getActiveSpaces(context);
+    setState(() {
+      spaces = data;
+    });
+    print(data);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,11 +129,12 @@ class _SpacesViewState extends State<SpacesView> {
                               itemBuilder: (context, index) {
                                 final space = spaces[index];
                                 return SpaceList(
-                                  spaceName: space["name"],
+                                  spaceName: space.name,
 
-                                  profilePictures: List<String>.from(
-                                    space["profiles"],
-                                  ),
+                                  // profilePictures: List<String>.from(
+                                  //   space["profiles"],
+                                  // ),
+                                  profilePictures: [""],
                                   // lastActive: space["lastActive"],
                                 );
                               },

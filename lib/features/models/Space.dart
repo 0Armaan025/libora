@@ -6,7 +6,7 @@ class Space {
   final String code;
   final List people;
   final List messages;
-  final DateTime createdAt;
+  final String createdAt;
 
   Space({
     required this.id,
@@ -17,20 +17,30 @@ class Space {
     required this.createdAt,
   });
 
-  factory Space.fromJson(Map json) {
-    List messagesList = [];
-    if (json['messages'] != null) {
-      messagesList =
-          List.from(json['messages'].map((x) => Message.fromJson(x)));
-    }
+  factory Space.fromJson(Map<String, dynamic> json) {
+    print("Raw JSON: $json"); // Debugging: See full object structure
 
     return Space(
-      id: json['_id'],
-      name: json['name'],
-      code: json['code'],
-      people: List.from(json['people']),
-      messages: messagesList,
-      createdAt: DateTime.parse(json['createdAt']),
+      id: json['_id'] ?? '',
+      name: json['name'] ?? 'Unknown',
+      code: json['code'] ?? '',
+      people: List<String>.from(json['people'] ?? []),
+      messages: _parseMessages(json['messages']),
+      createdAt: json['createdAt'] ?? '',
     );
+  }
+
+  static List<Message> _parseMessages(dynamic messages) {
+    if (messages == null) return []; // ✅ Return empty list if missing
+
+    if (messages is List) {
+      return messages
+          .whereType<Map<String, dynamic>>() // ✅ Ensure each item is a Map
+          .map((x) => Message.fromJson(x))
+          .toList();
+    }
+
+    print("Unexpected messages format: $messages"); // Debugging output
+    return []; // ✅ Return empty list if format is unexpected
   }
 }

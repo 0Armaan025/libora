@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/msg_view/msg_view.dart';
 import 'package:libora/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookCommunityScreen extends StatefulWidget {
-  const BookCommunityScreen({super.key});
+  final String code;
+  const BookCommunityScreen({super.key, required this.code});
 
   @override
   State<BookCommunityScreen> createState() => _BookCommunityScreenState();
@@ -93,17 +96,35 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
   @override
   void dispose() {
+    getPersonouttaHere();
+
     _tabController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+    getPersonouttaHere();
   }
 
   @override
   void deactivate() {
+    getPersonouttaHere();
     // TODO: implement deactivate
     super.deactivate();
     // now I want to get the person out of any joined spaces
+    getPersonouttaHere();
+  }
+
+  getPersonouttaHere() {
+    getMeOut();
+  }
+
+  getMeOut() async {
+    ApiService service = ApiService();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final name = prefs.getString("name");
+    await service.leaveSpace(name!, widget.code);
   }
 
   void _onSearchChanged() {
@@ -263,7 +284,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
             mainAxisSize: MainAxisSize.min, // Adjusts to content size
             children: [
               Text(
-                "Space code: 456",
+                "Space code: ${widget.code}",
                 style: GoogleFonts.poppins(color: Colors.black, fontSize: 24),
               ),
               SizedBox(width: 8), // Adds some space between text and icon

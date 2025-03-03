@@ -9,11 +9,15 @@ class Message {
     required this.timestamp,
   });
 
-  factory Message.fromJson(Map json) {
+  factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      user: json['user'],
-      message: json['message'],
-      timestamp: DateTime.parse(json['timestamp']),
+      user: json.containsKey('user')
+          ? json['user']
+          : 'Unknown', // ✅ Handles missing user
+      message: json['message'] ?? '', // Add null check here
+      timestamp: json.containsKey('createdAt')
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(), // Handle missing timestamp
     );
   }
 }

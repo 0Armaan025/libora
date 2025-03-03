@@ -23,9 +23,9 @@ class AuthController {
     }
   }
 
-  Future<void> getUserDetails(BuildContext context) async {
+  Future<void> getUserDetails(BuildContext context, String name) async {
     try {
-      await _authRepository.getUserData(context);
+      await _authRepository.getUserData(context, name);
     } catch (e) {
       rethrow;
     }

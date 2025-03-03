@@ -64,7 +64,7 @@ class _SpaceListState extends State<SpaceList> {
             alignment: Alignment.centerRight,
             child: InkWell(
               onTap: () {
-                moveScreen(context, BookCommunityScreen());
+                moveScreen(context, BookCommunityScreen(code: "123"));
               },
               child: Container(
                 width: size.width * 0.15,
