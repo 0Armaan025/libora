@@ -9,6 +9,7 @@ class BookModel {
   final String language;
   final String fileSize;
   final String format;
+  final String libgenMirror;
   BookModel({
     required this.title,
     required this.author,
@@ -17,6 +18,7 @@ class BookModel {
     required this.language,
     required this.fileSize,
     required this.format,
+    required this.libgenMirror,
   });
 
   BookModel copyWith({
@@ -27,6 +29,7 @@ class BookModel {
     String? language,
     String? fileSize,
     String? format,
+    String? libgenMirror,
   }) {
     return BookModel(
       title: title ?? this.title,
@@ -36,6 +39,7 @@ class BookModel {
       language: language ?? this.language,
       fileSize: fileSize ?? this.fileSize,
       format: format ?? this.format,
+      libgenMirror: libgenMirror ?? this.libgenMirror,
     );
   }
 
@@ -48,29 +52,31 @@ class BookModel {
       'language': language,
       'fileSize': fileSize,
       'format': format,
+      'libgenMirror': libgenMirror,
     };
   }
 
   factory BookModel.fromMap(Map<String, dynamic> map) {
     return BookModel(
-      title: map['title'] as String,
-      author: map['author'] as String,
-      publisher: map['publisher'] as String,
-      year: map['year'] as String,
-      language: map['language'] as String,
-      fileSize: map['fileSize'] as String,
-      format: map['format'] as String,
+      title: map['title'] ?? '',
+      author: map['author'] ?? '',
+      publisher: map['publisher'] ?? '',
+      year: map['year'] ?? '',
+      language: map['language'] ?? '',
+      fileSize: map['fileSize'] ?? '',
+      format: map['format'] ?? '',
+      libgenMirror: map['libgenMirror'] ?? '',
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory BookModel.fromJson(String source) =>
-      BookModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory BookModel.fromJson(Map<String, dynamic> map) =>
+      BookModel.fromMap(map);
 
   @override
   String toString() {
-    return 'BookModel(title: $title, author: $author, publisher: $publisher, year: $year, language: $language, fileSize: $fileSize, format: $format)';
+    return 'BookModel(title: $title, author: $author, publisher: $publisher, year: $year, language: $language, fileSize: $fileSize, format: $format, libgenMirror: $libgenMirror)';
   }
 
   @override
@@ -83,7 +89,8 @@ class BookModel {
         other.year == year &&
         other.language == language &&
         other.fileSize == fileSize &&
-        other.format == format;
+        other.format == format &&
+        other.libgenMirror == libgenMirror;
   }
 
   @override
@@ -94,6 +101,7 @@ class BookModel {
         year.hashCode ^
         language.hashCode ^
         fileSize.hashCode ^
-        format.hashCode;
+        format.hashCode ^
+        libgenMirror.hashCode;
   }
 }

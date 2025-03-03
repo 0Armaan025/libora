@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/features/controllers/auth_controller.dart';
+import 'package:libora/features/controllers/book_controller.dart';
+import 'package:libora/features/models/Book.dart';
 import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/msg_view/msg_view.dart';
 import 'package:libora/utils/utils.dart';
@@ -27,6 +29,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   // List to store community members with their details
   List<Map<String, dynamic>> communityMembers = [];
   bool isLoading = true;
+
+  List<BookModel> searchedBooks = [];
 
   // Non-romantic emojis for reading status
   final List<String> readingEmojis = [
@@ -197,6 +201,21 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     super.dispose();
   }
 
+  void searchBooks(BuildContext context) async {
+    final query = _searchController.text;
+    if (query.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a search term")),
+      );
+      return;
+    }
+
+    // Fetch books based on search query
+    BookController controller = BookController();
+    searchedBooks = await controller.fetchBooks(context, query);
+    setState(() {});
+  }
+
   @override
   void deactivate() {
     getPersonouttaHere();
@@ -245,10 +264,10 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   }
 
   // Function to handle book selection
-  void onBookSelected(Map<String, dynamic> book) {
+  void onBookSelected(BookModel book) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Opening "${book["title"]}"'),
+        content: Text('Opening "${book.title}"'),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.blue,
         shape: RoundedRectangleBorder(
@@ -259,8 +278,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   }
 
   // Function to handle book search
-  void onBookSearch(String query) {
-    print('Searching for book: $query');
+  void onBookSearch(String query) async {
+    searchBooks(context);
   }
 
   List<Map<String, dynamic>> get filteredMembers {
@@ -551,7 +570,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           Expanded(
             child: _searchQuery.isEmpty
                 ? _buildEmptySearchState() // New empty state when no search
-                : filteredBooks.isEmpty
+                : searchedBooks.isEmpty
                     ? _buildEmptyState() // Your existing empty state for no results
                     : GridView.builder(
                         gridDelegate:
@@ -561,9 +580,9 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                           mainAxisSpacing: 16,
                           childAspectRatio: 0.65,
                         ),
-                        itemCount: filteredBooks.length,
+                        itemCount: searchedBooks.length,
                         itemBuilder: (context, index) {
-                          final book = filteredBooks[index];
+                          final book = searchedBooks[index];
                           return _buildBookCard(book);
                         },
                       ),
@@ -605,9 +624,9 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     );
   }
 
-  Widget _buildBookCard(Map<String, dynamic> book) {
+  Widget _buildBookCard(BookModel book) {
     return Hero(
-      tag: 'book-${book["title"]}',
+      tag: 'book-${book.title}',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -646,7 +665,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                         ),
                       ],
                       image: DecorationImage(
-                        image: NetworkImage(book["cover"]),
+                        image: NetworkImage(""),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -659,7 +678,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    book["title"],
+                    book.title,
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -677,7 +696,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    book["author"],
+                    book.author,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey[600],

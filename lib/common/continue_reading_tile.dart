@@ -76,7 +76,7 @@ class ContinueReadingTile extends StatelessWidget {
             '"${randomQuote["text"]}"',
             style: GoogleFonts.poppins(
               color: Colors.black87,
-              fontSize: size.width * 0.045,
+              fontSize: size.width * 0.04,
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w500,
             ),
@@ -98,4 +98,3 @@ class ContinueReadingTile extends StatelessWidget {
     );
   }
 }
- 
