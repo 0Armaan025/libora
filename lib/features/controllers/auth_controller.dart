@@ -8,6 +8,7 @@ class AuthController {
   Future<void> signUp(BuildContext context, String name, String pass,
       String profileImage) async {
     try {
+      print('in controller function');
       await _authRepository.signUp(name, pass, context, profileImage);
     } catch (e) {
       rethrow;

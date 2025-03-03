@@ -35,10 +35,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   checkAuthStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? isLoggedIn = prefs.getString('status');
 
-    if (isLoggedIn == "logged_in")
+    final name = prefs.getString('name');
+    print(
+      "the user name is ${name}",
+    );
+    final isLoggedIn = prefs.getString('status');
+
+    if (isLoggedIn == "logged_in") {
+      print("the status is = ${isLoggedIn!}");
+
       moveScreen(context, HomePage(), isPushReplacement: true);
+    } else {
+      moveScreen(context, SignUpPage(), isPushReplacement: true);
+    }
   }
 
   @override

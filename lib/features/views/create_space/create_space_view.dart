@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/book_community/book_community_view.dart';
@@ -38,10 +39,9 @@ class _CreateSpaceScreenState extends State {
   }
 
   void _createSpace() async {
-    if (_spaceNameController.text.isEmpty || _usernameController.text.isEmpty) {
+    if (_spaceNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Please enter both space name and your name")),
+        const SnackBar(content: Text("Please enter space name ")),
       );
       return;
     }
@@ -55,12 +55,14 @@ class _CreateSpaceScreenState extends State {
       final randomCode = (100 + (DateTime.now().millisecond % 900)).toString();
 
       // Save username for future use
-      await _saveUsername();
+
+      final prefs = await SharedPreferences.getInstance();
+      final name = await prefs.getString('name');
 
       // Create space on the server
       final space = await _apiService.createSpace(
-        _spaceNameController.text,
-        _usernameController.text,
+        name!,
+        _spaceNameController.text.trim(),
         randomCode,
       );
 
@@ -85,12 +87,18 @@ class _CreateSpaceScreenState extends State {
                 style: GoogleFonts.poppins(),
               ),
               const SizedBox(height: 8),
-              Text(
-                _spaceCode!,
-                style: GoogleFonts.poppins(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              InkWell(
+                onTap: () {
+                  ClipboardData data = ClipboardData(text: _spaceCode!);
+                  Clipboard.setData(data);
+                },
+                child: Text(
+                  _spaceCode!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -157,29 +165,6 @@ class _CreateSpaceScreenState extends State {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Your Name",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                hintText: "Enter your name",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             Text(
               "Space Name",
               style: GoogleFonts.poppins(

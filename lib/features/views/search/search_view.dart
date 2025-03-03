@@ -50,9 +50,25 @@ class _UserSearchViewState extends State<UserSearchView> {
         headers: {"Content-Type": "application/json"},
       );
 
+      print('Response Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
+
+        if (!data.containsKey('users')) {
+          if (mounted)
+            showSnackBar(context, "Invalid response: No 'users' key found.");
+          setState(() {
+            _users = [];
+            _isLoading = false;
+          });
+          return;
+        }
+
         List users = data['users'];
+        print('Extracted Users: $users');
+        print('Users Length: ${users.length}');
 
         if (users.isEmpty) {
           if (mounted) showSnackBar(context, "No users found.");
@@ -60,19 +76,28 @@ class _UserSearchViewState extends State<UserSearchView> {
             _users = [];
             _isLoading = false;
           });
-        } else {
-          if (mounted) showSnackBar(context, "Found ${users.length} users.");
-
-          List<UserModel> usersList = [];
-          for (var user in users) {
-            usersList.add(UserModel.fromJson(user));
-          }
-
-          setState(() {
-            _users = usersList;
-            _isLoading = false;
-          });
+          return;
         }
+
+        List<UserModel> usersList = [];
+        for (var user in users) {
+          usersList.add(UserModel(
+            pass: user['password'],
+            booksRead: List<String>.from(user['booksRead'] ?? []), // ✅ Fixed
+            createdAt: user['createdAt'],
+            following: List<String>.from(user['following'] ?? []), // ✅ Fixed
+            name: user['name'],
+            profileImage: user['profileImage'],
+            followers: List<String>.from(user['followers'] ?? []), // ✅ Fixed
+          ));
+        }
+
+        setState(() {
+          _users = usersList;
+          _isLoading = false;
+        });
+
+        if (mounted) showSnackBar(context, "Found ${usersList.length} users.");
       } else {
         if (mounted) showSnackBar(context, "Error: ${response.body}");
         setState(() {
@@ -80,6 +105,7 @@ class _UserSearchViewState extends State<UserSearchView> {
         });
       }
     } catch (e) {
+      print('Error: $e');
       if (mounted)
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');
       setState(() {
@@ -126,10 +152,8 @@ class _UserSearchViewState extends State<UserSearchView> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      final currentUserName =
-          prefs.getString("name"); 
+      final currentUserName = prefs.getString("name");
 
-      
       setState(() {
         if (followedUsers.contains(username)) {
           followedUsers.remove(username);
@@ -140,7 +164,6 @@ class _UserSearchViewState extends State<UserSearchView> {
 
       final isFollowing = followedUsers.contains(username);
 
-      
       final url =
           Uri.parse('https://libora-api.onrender.com/api/user/update-user');
 
@@ -467,15 +490,6 @@ class _UserSearchViewState extends State<UserSearchView> {
                         ],
                       ),
                       SizedBox(height: 4),
-                      Text(
-                        user.name ??
-                            "@" + user.name.toLowerCase().replaceAll(" ", "_"),
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey[600],
-                        ),
-                      ),
                       if (user.followers != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),

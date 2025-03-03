@@ -1,25 +1,34 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Message.dart';
 import '../models/space.dart';
 
 class ApiService {
-  final String baseUrl = "https://libora-api.onrender.com/api/space";
+  final String baseUrl = "https://libora-api.onrender.com";
 
   // Create a new space
   Future createSpace(String name, String person, String code) async {
+    print("name: ${person}, person: ${name}, code: ${code}");
     final response = await http.post(
       Uri.parse('$baseUrl/api/space/create'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'name': name,
-        'person': person,
+        'name': person,
+        'person': name,
         'code': code,
       }),
     );
 
+    // to future Armaan, I did this on purpose coz I swapped the values
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final username = await prefs.getString('name');
+      final spaceName = await prefs.setString("space_name", name);
+      final spaceCode = await prefs.setString("space_code", code);
+      final inSpace = await prefs.setBool("in_space", true);
       return Space.fromJson(data['space']);
     } else {
       throw Exception('Failed to create space: ${response.body}');
@@ -39,6 +48,12 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final username = await prefs.getString('name');
+      final spaceName =
+          await prefs.setString("space_name", data['space']['name']);
+      final spaceCode = await prefs.setString("space_code", code);
+      final inSpace = await prefs.setBool("in_space", true);
       return Space.fromJson(data['space']);
     } else {
       throw Exception('Failed to join space: ${response.body}');

@@ -99,6 +99,13 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     super.dispose();
   }
 
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+    // now I want to get the person out of any joined spaces
+  }
+
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text;

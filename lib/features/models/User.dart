@@ -59,9 +59,9 @@ class UserModel {
       pass: map['pass'] as String,
       profileImage: map['profileImage'] as String,
       createdAt: map['createdAt'] as String,
-      followers: List<String>.from((map['followers'] as List<String>)),
-      following: List<String>.from((map['following'] as List<String>)),
-      booksRead: List<String>.from((map['booksRead'] as List<String>)),
+      followers: List<String>.from((map['followers'] ?? [])),
+      following: List<String>.from((map['following'] ?? [])),
+      booksRead: List<String>.from((map['booksRead'] ?? [])),
     );
   }
 

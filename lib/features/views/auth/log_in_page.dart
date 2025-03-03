@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/common/common_auth_btn.dart';
+import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/views/auth/sign_up_page.dart';
 import 'package:libora/utils/utils.dart';
 
@@ -13,7 +14,24 @@ class LogInPage extends StatefulWidget {
 
 class _LogInPageState extends State<LogInPage> {
   bool _isObscure = true;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final bool _isAccepted = false;
+
+  void logIn(BuildContext context) {
+    // Implement login functionality here
+    AuthController _controller = AuthController();
+    _controller.logIn(
+        context, _nameController.text.trim(), _passwordController.text.trim());
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +160,11 @@ class _LogInPageState extends State<LogInPage> {
               const SizedBox(
                 height: 20,
               ),
-              CommonAuthBtn(onTap: () {}, text: 'Log In'),
+              CommonAuthBtn(
+                  onTap: () {
+                    logIn(context);
+                  },
+                  text: 'Log In'),
               SizedBox(height: MediaQuery.of(context).size.height * 0.48),
               GestureDetector(
                 onTap: () {

@@ -37,11 +37,14 @@ class _SignUpPageState extends State<SignUpPage> {
     'https://cdn-icons-png.flaticon.com/128/706/706830.png',
   ];
 
-  void signUp(BuildContext context, String username, String password) async {
+  void signUp(
+    BuildContext context,
+  ) async {
     AuthController _controller = AuthController();
-
-    await _controller.signUp(context, _nameController.text,
-        _passwordController.text, selectedAvatar);
+    print(
+        'in sign up of page function ${_nameController.text.trim() + _passwordController.text.trim()}');
+    await _controller.signUp(context, _nameController.text.trim(),
+        _passwordController.text.trim(), selectedAvatar);
   }
 
   void _showAvatarSelection() {
@@ -136,16 +139,18 @@ class _SignUpPageState extends State<SignUpPage> {
                 ],
               ),
               const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 20, top: 10),
-                child: Text(
-                  "Sign Up",
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400,
-                    fontSize: 35,
+              InkWell(
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 20, top: 10),
+                  child: Text(
+                    "Sign Up",
+                    style: GoogleFonts.poppins(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 35,
+                    ),
                   ),
                 ),
               ),
@@ -288,7 +293,14 @@ class _SignUpPageState extends State<SignUpPage> {
               const SizedBox(
                 height: 20,
               ),
-              CommonAuthBtn(onTap: () {}, text: 'Sign up'),
+              CommonAuthBtn(
+                  onTap: () {
+                    // onTap: () {
+                    print('touched');
+                    signUp(context);
+                    // },
+                  },
+                  text: 'Sign up'),
               SizedBox(height: MediaQuery.of(context).size.height * 0.28),
               GestureDetector(
                 onTap: () {

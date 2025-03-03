@@ -15,14 +15,17 @@ class AuthRepository {
       final response = await http.post(url,
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(
-              {"name": name, "password": pass, "profileImage": profileImage}));
-
+              {"name": name, "pass": pass, "profileImage": profileImage}));
+      print('in repository function');
       if (response.statusCode == 200) {
+        print("code is 200");
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("name", name);
         await prefs.setString("status", "logged_in");
 
         moveScreen(context, HomePage(), isPushReplacement: true);
+      } else {
+        print(response.body);
       }
     } catch (e) {
       showSnackBar(context, 'Error occurred :(, please contact Armaan!');
