@@ -29,7 +29,7 @@ class _HomePageContentState extends State<HomePageContent> {
                 // Top Section
                 Container(
                   width: double.infinity,
-                  height: height * 0.48,
+                  height: height * 0.44,
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
                     color: Pallete().buttonColor,
@@ -75,7 +75,7 @@ class _HomePageContentState extends State<HomePageContent> {
                         ),
                         SizedBox(height: height * 0.03),
                         Text(
-                          "Continue Reading",
+                          "A random quote",
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: width * 0.06,
@@ -168,7 +168,10 @@ class _HomePageContentState extends State<HomePageContent> {
                         ),
                       ),
                       SizedBox(height: height * 0.02),
-                      ActiveSpacesTile(),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: ActiveSpacesTile(),
+                      ),
                     ],
                   ),
                 ),

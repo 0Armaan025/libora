@@ -1,30 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'dart:math';
 
 class ContinueReadingTile extends StatelessWidget {
-  final String imageUrl;
-  final String bookName;
-  final String authorName;
+  final List<Map<String, String>> quotes = [
+    {
+      "text": "The only way to do great work is to love what you do.",
+      "author": "Armaan"
+    },
+    {
+      "text": "Life is what happens when you're busy making other plans.",
+      "author": "Armaan"
+    },
+    {
+      "text":
+          "The future belongs to those who believe in the beauty of their dreams.",
+      "author": "Armaan"
+    },
+    {
+      "text": "In the middle of difficulty lies opportunity.",
+      "author": "Armaan"
+    },
+    {
+      "text": "The best way to predict the future is to create it.",
+      "author": "Armaan"
+    },
+    {"text": "Simplicity is the ultimate sophistication.", "author": "Armaan"},
+    {
+      "text": "Yesterday is history, tomorrow is a mystery, today is a gift.",
+      "author": "Armaan"
+    },
+  ];
 
-  const ContinueReadingTile({
+  ContinueReadingTile({
     super.key,
-    required this.imageUrl,
-    required this.bookName,
-    required this.authorName,
+    // Keeping required parameters for compatibility but not using them
+    required String imageUrl,
+    required String bookName,
+    required String authorName,
   });
+
+  Map<String, String> getRandomQuote() {
+    final random = Random();
+    return quotes[random.nextInt(quotes.length)];
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final randomQuote = getRandomQuote();
 
     return Container(
-      width: size.width * 0.9, // More flexible width
+      width: size.width * 0.9,
       margin: EdgeInsets.symmetric(
         vertical: size.height * 0.02,
         horizontal: size.width * 0.04,
       ),
-      padding: EdgeInsets.all(size.width * 0.03),
+      padding: EdgeInsets.all(size.width * 0.04),
       decoration: BoxDecoration(
         color: HexColor("#fffeff"),
         borderRadius: BorderRadius.circular(8),
@@ -36,70 +69,28 @@ class ContinueReadingTile extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Book Cover
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              imageUrl,
-              width: size.width * 0.25, // Scales with screen width
-              height: size.height * 0.15, // Scales with screen height
-              fit: BoxFit.cover,
+          Text(
+            '"${randomQuote["text"]}"',
+            style: GoogleFonts.poppins(
+              color: Colors.black87,
+              fontSize: size.width * 0.045,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(width: size.width * 0.04), // Dynamic spacing
-
-          // Book Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  bookName,
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontSize: size.width * 0.05, // Scales with width
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis, // Prevents overflow
-                ),
-                SizedBox(height: size.height * 0.005),
-
-                Text(
-                  authorName.toUpperCase(),
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey.shade600,
-                    fontSize: size.width * 0.04, // Scales with width
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: size.height * 0.01),
-
-                // Read Button
-                TextButton.icon(
-                  onPressed: () {
-                    // Add navigation or reading functionality here
-                  },
-                  icon: Icon(
-                    Icons.book,
-                    color: Colors.green,
-                    size: size.width * 0.05, // Adaptive icon size
-                  ),
-                  label: Text(
-                    'Read',
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey.shade700,
-                      fontSize: size.width * 0.045,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    side: BorderSide(
-                        color: Colors.grey, width: 1), // Thin grey border
-                  ),
-                ),
-              ],
+          SizedBox(height: size.height * 0.01),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              "~ ${randomQuote["author"]}",
+              style: GoogleFonts.poppins(
+                color: Colors.grey.shade700,
+                fontSize: size.width * 0.04,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -107,3 +98,4 @@ class ContinueReadingTile extends StatelessWidget {
     );
   }
 }
+ 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:libora/common/space_list.dart';
+import 'package:libora/features/repositories/space_repository.dart';
 
 class ActiveSpacesTile extends StatefulWidget {
   const ActiveSpacesTile({super.key});
@@ -10,6 +11,28 @@ class ActiveSpacesTile extends StatefulWidget {
 }
 
 class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
+  List<dynamic> spaces = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getSpaceData();
+  }
+
+  getSpaceData() {
+    getData();
+  }
+
+  getData() async {
+    ApiService service = ApiService();
+    final data = await service.getActiveSpaces(context);
+    setState(() {
+      spaces = data;
+    });
+    print(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -39,15 +62,64 @@ class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 12.0),
-            child: SpaceList(
-              spaceName: 'My Space',
-              profilePictures: [
-                'https://cdn-icons-png.flaticon.com/128/1999/1999625.png'
-              ],
+            child: SizedBox(
+              height: size.height * 0.1,
+              child: spaces.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      // Key physics settings to ensure proper scrolling
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: spaces.length >= 3 ? 3 : spaces.length,
+                      itemBuilder: (context, index) {
+                        final space = spaces[index];
+                        return SpaceList(
+                          spaceName: space.name,
+
+                          // profilePictures: List<String>.from(
+                          //   space["profiles"],
+                          // ),
+                          profilePictures: [""],
+                          // lastActive: space["lastActive"],
+                        );
+                      },
+                    ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+Widget _buildEmptyState() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.group_outlined,
+          size: 30,
+          color: Colors.grey[400],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "No Active Spaces",
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Create or join a space to get started",
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey[500],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:libora/features/repositories/space_repository.dart';
+import 'package:libora/features/views/book_community/book_community_view.dart';
+import 'package:libora/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class JoinSpaceScreen extends StatefulWidget {
   const JoinSpaceScreen({super.key});
@@ -12,7 +16,7 @@ class JoinSpaceScreen extends StatefulWidget {
 class _JoinSpaceScreenState extends State<JoinSpaceScreen> {
   final _spaceCodeController = TextEditingController();
 
-  void _joinSpace() {
+  void _joinSpace() async {
     if (_spaceCodeController.text.isEmpty ||
         _spaceCodeController.text.length != 3) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -21,35 +25,19 @@ class _JoinSpaceScreenState extends State<JoinSpaceScreen> {
       return;
     }
 
-    // Simulate joining a space
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          "Space Joined!",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        content: Text(
-          "You have successfully joined the space.",
-          style: GoogleFonts.poppins(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context); // Return to the previous screen
-            },
-            child: Text(
-              "Done",
-              style: GoogleFonts.poppins(
-                color: HexColor("#3e7bfa"),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    ApiService service = ApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String person = prefs.getString('name') ?? '';
+    final space =
+        await service.joinSpace(context, person, _spaceCodeController.text);
+    moveScreen(context, BookCommunityScreen(code: space.code));
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _spaceCodeController.dispose();
   }
 
   @override

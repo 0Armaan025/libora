@@ -52,7 +52,8 @@ class AuthRepository {
     }
   }
 
-  Future<void> getUserData(BuildContext context, String givenName) async {
+  Future<Map<String, dynamic>?> getUserData(
+      BuildContext context, String givenName) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String? name = "";
@@ -76,7 +77,7 @@ class AuthRepository {
         );
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(response.body);
-          showSnackBar(context, "Welcome back, ${data['name']}!");
+          return data;
         }
       } catch (e) {
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');

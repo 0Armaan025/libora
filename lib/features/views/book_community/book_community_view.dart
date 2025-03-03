@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/msg_view/msg_view.dart';
 import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
 class BookCommunityScreen extends StatefulWidget {
   final String code;
@@ -22,31 +24,45 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   bool _isSearchFocused = false;
   final FocusNode _searchFocusNode = FocusNode();
 
-  // Sample data for community members
-  final List<Map<String, dynamic>> communityMembers = [
-    {
-      "name": "Alice",
-      "book": "The Great Gatsby",
-      "image": "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
-    },
-    {
-      "name": "Bob",
-      "book": "1984",
-      "image": "https://cdn-icons-png.flaticon.com/128/4140/4140048.png",
-    },
-    {
-      "name": "Charlie",
-      "book": "To Kill a Mockingbird",
-      "image": "https://cdn-icons-png.flaticon.com/128/4333/4333609.png",
-    },
-    {
-      "name": "Diana",
-      "book": "Pride and Prejudice",
-      "image": "https://cdn-icons-png.flaticon.com/128/4333/4333607.png",
-    },
+  // List to store community members with their details
+  List<Map<String, dynamic>> communityMembers = [];
+  bool isLoading = true;
+
+  // Non-romantic emojis for reading status
+  final List<String> readingEmojis = [
+    '📚',
+    '📖',
+    '🔍',
+    '🧠',
+    '🎓',
+    '💡',
+    '🌟',
+    '🌈',
+    '🌻',
+    '🍀',
+    '🌴',
+    '🌋',
+    '🏔️',
+    '🏕️',
+    '🚀',
+    '⭐',
+    '✨',
+    '🔭',
+    '🎯',
+    '🧩',
+    '🎲',
+    '🎮',
+    '🎸',
+    '🎨',
+    '🏆',
+    '🥇',
+    '🏅',
+    '🏄',
+    '🏃',
+    '🧗',
   ];
 
-  // Sample data for books
+  // Sample data for books (keeping this unchanged)
   final List<Map<String, dynamic>> books = [
     {
       "title": "The Great Gatsby",
@@ -92,26 +108,99 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(_onSearchFocusChanged);
+
+    getPeople();
+  }
+
+  // Get random emoji for reading status
+  String getRandomEmoji() {
+    final random = Random();
+    return readingEmojis[random.nextInt(readingEmojis.length)];
+  }
+
+  getPeople() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await getPeopleHere();
+    } catch (e) {
+      print("Error getting people: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  getPeopleHere() async {
+    ApiService service = ApiService();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString("name");
+
+    final peopleList = await service.getPeople(widget.code);
+    print("People are $peopleList");
+
+    // Clear the current list
+    communityMembers.clear();
+
+    // Get details for each person and add to communityMembers
+    if (peopleList is List) {
+      for (String personName in peopleList) {
+        try {
+          final userDetails = await getUserDetails(context, personName);
+          if (userDetails != null) {
+            // Add user with details to our list
+            communityMembers.add({
+              "name": personName,
+              "emoji": getRandomEmoji(), // Random emoji for reading status
+              "image": userDetails["profileImage"] ??
+                  "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
+            });
+          }
+        } catch (e) {
+          print("Error getting details for $personName: $e");
+          // Add with default values if there's an error
+          communityMembers.add({
+            "name": personName,
+            "emoji": getRandomEmoji(),
+            "image": "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
+          });
+        }
+      }
+
+      // Update the UI
+      setState(() {});
+    }
+  }
+
+  // Get user details - Modified to return user data
+  Future<Map<String, dynamic>?> getUserDetails(
+      BuildContext context, String name) async {
+    AuthController controller = AuthController();
+    try {
+      final user = await controller.getUserDetails(context, name);
+      return user;
+    } catch (e) {
+      print("Error fetching user details for $name: $e");
+      return null;
+    }
   }
 
   @override
   void dispose() {
     getPersonouttaHere();
-
     _tabController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
-    getPersonouttaHere();
   }
 
   @override
   void deactivate() {
     getPersonouttaHere();
-    // TODO: implement deactivate
     super.deactivate();
-    // now I want to get the person out of any joined spaces
-    getPersonouttaHere();
   }
 
   getPersonouttaHere() {
@@ -120,11 +209,11 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
   getMeOut() async {
     ApiService service = ApiService();
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     final name = prefs.getString("name");
-    await service.leaveSpace(name!, widget.code);
+    if (name != null) {
+      await service.leaveSpace(name, widget.code);
+    }
   }
 
   void _onSearchChanged() {
@@ -141,10 +230,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
   // Function to handle member selection
   void onMemberSelected(Map<String, dynamic> member) {
-    // Call your function here
     print('Selected member: ${member["name"]}');
 
-    // Show a snackbar for demonstration
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Viewing ${member["name"]}\'s profile'),
@@ -155,14 +242,10 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         ),
       ),
     );
-
-    // Add your implementation here
-    // For example: navigateToMemberProfile(member);
   }
 
   // Function to handle book selection
   void onBookSelected(Map<String, dynamic> book) {
-    // Show a snackbar for demonstration
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Opening "${book["title"]}"'),
@@ -173,18 +256,11 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         ),
       ),
     );
-
-    // Add your implementation here
-    // For example: navigateToBookReader(book);
   }
 
   // Function to handle book search
   void onBookSearch(String query) {
-    // Call your function here
     print('Searching for book: $query');
-
-    // Add your implementation here
-    // For example: fetchBooks(query);
   }
 
   List<Map<String, dynamic>> get filteredMembers {
@@ -192,10 +268,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       return communityMembers;
     }
     return communityMembers.where((member) {
-      return member["name"]
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          member["book"].toLowerCase().contains(_searchQuery.toLowerCase());
+      return member["name"].toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
 
@@ -262,7 +335,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         child: FloatingActionButton(
           onPressed: () {
             // Navigate to messaging screen
-            moveScreen(context, GroupChatScreen(spaceName: "active sapce"));
+            moveScreen(context, GroupChatScreen(spaceName: "active space"));
           },
           backgroundColor: Colors.blue,
           elevation: 3,
@@ -277,20 +350,20 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Bar
+        // Space code with copy button
         Padding(
           padding: const EdgeInsets.only(left: 14.0, top: 8),
           child: Row(
-            mainAxisSize: MainAxisSize.min, // Adjusts to content size
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "Space code: ${widget.code}",
                 style: GoogleFonts.poppins(color: Colors.black, fontSize: 24),
               ),
-              SizedBox(width: 8), // Adds some space between text and icon
+              SizedBox(width: 8),
               GestureDetector(
                 onTap: () {
-                  Clipboard.setData(ClipboardData(text: "456"));
+                  Clipboard.setData(ClipboardData(text: widget.code));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Copied to clipboard!")),
                   );
@@ -300,7 +373,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
             ],
           ),
         ),
-        // Results count
+
+        // Results count when searching
         if (_searchQuery.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -316,27 +390,29 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
             ),
           ),
 
-        // Grid of community members
+        // Loading indicator or grid of members
         Expanded(
-          child: filteredMembers.isEmpty
-              ? _buildEmptyState()
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.8,
+          child: isLoading
+              ? Center(child: CircularProgressIndicator())
+              : filteredMembers.isEmpty
+                  ? _buildEmptyState()
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: filteredMembers.length,
+                        itemBuilder: (context, index) {
+                          final member = filteredMembers[index];
+                          return _buildCommunityCard(member);
+                        },
+                      ),
                     ),
-                    itemCount: filteredMembers.length,
-                    itemBuilder: (context, index) {
-                      final member = filteredMembers[index];
-                      return _buildCommunityCard(member);
-                    },
-                  ),
-                ),
         ),
       ],
     );
@@ -384,7 +460,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    "Reading: ${member["book"]}",
+                    "Reading right now ${member["emoji"]}",
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -578,8 +654,6 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                 ),
 
                 const SizedBox(height: 8),
-
-                // Rating
               ],
             ),
           ),

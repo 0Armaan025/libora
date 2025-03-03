@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Message.dart';
 import '../models/space.dart';
@@ -37,7 +38,7 @@ class ApiService {
   }
 
   // Join an existing space
-  Future joinSpace(String person, String code) async {
+  Future joinSpace(BuildContext context, String person, String code) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/space/join'),
       headers: {'Content-Type': 'application/json'},
@@ -57,7 +58,7 @@ class ApiService {
       final inSpace = await prefs.setBool("in_space", true);
       return Space.fromJson(data['space']);
     } else {
-      throw Exception('Failed to join space: ${response.body}');
+      showSnackBar(context, 'Failed to join space: ${response.body}');
     }
   }
 
@@ -117,11 +118,11 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      List messages = [];
+      List people = [];
       if (data['people'] != null) {
-        messages = List.from(data['people'].map((x) => Message.fromJson(x)));
+        people = List.from(data['people'].map((x) => x));
       }
-      return messages;
+      return people;
     } else {
       throw Exception('Failed to get people: ${response.body}');
     }
