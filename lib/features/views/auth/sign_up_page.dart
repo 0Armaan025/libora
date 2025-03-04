@@ -29,11 +29,13 @@ class _SignUpPageState extends State<SignUpPage> {
     'https://cdn-icons-png.flaticon.com/128/4140/4140047.png',
     'https://cdn-icons-png.flaticon.com/128/147/147144.png',
     'https://cdn-icons-png.flaticon.com/128/236/236831.png',
+    'https://cdn-icons-png.flaticon.com/128/4322/4322991.png',
+    'https://cdn-icons-png.flaticon.com/128/4333/4333609.png',
+    'https://cdn-icons-png.flaticon.com/128/1154/1154448.png',
+    'https://cdn-icons-png.flaticon.com/128/16683/16683419.png',
     'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
-    'https://cdn-icons-png.flaticon.com/128/1999/1999054.png',
+    "https://cdn-icons-png.flaticon.com/128/924/924915.png",
+    "https://cdn-icons-png.flaticon.com/128/3940/3940403.png",
     'https://cdn-icons-png.flaticon.com/128/706/706830.png',
   ];
 
