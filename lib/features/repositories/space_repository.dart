@@ -28,7 +28,7 @@ class ApiService {
       final data = jsonDecode(response.body);
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final username = await prefs.getString('name');
-      final spaceName = await prefs.setString("space_name", name);
+      final spaceName = await prefs.setString("space_name", person);
       final spaceCode = await prefs.setString("space_code", code);
       final inSpace = await prefs.setBool("in_space", true);
       return Space.fromJson(data['space']);

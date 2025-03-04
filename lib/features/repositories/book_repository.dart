@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -43,6 +44,22 @@ class BookRepository {
     } catch (e) {
       print('error is ${e.toString()}');
       throw Exception("Failed to parse books");
+    }
+  }
+
+  Future<File?> getStreamedBook(
+      String mirrorUrl, String title, String format) async {
+    final response = await http.get(Uri.parse(
+        "$baseUrl/api/scrape/download?mirrorUrl=$mirrorUrl&title=$title&format=$format"));
+
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+
+      final file = File(title);
+      await file.writeAsBytes(bytes);
+      return file;
+    } else {
+      throw Exception("Failed to load book");
     }
   }
 }

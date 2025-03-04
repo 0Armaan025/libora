@@ -15,6 +15,8 @@ class BookDetailScreen extends StatefulWidget {
   final List<String> genres;
   final int pageCount;
   final String publishDate;
+  final String mirrorLink;
+  final String format;
 
   const BookDetailScreen({
     super.key,
@@ -26,6 +28,8 @@ class BookDetailScreen extends StatefulWidget {
     this.genres = const ['Fiction', 'Fantasy'],
     this.pageCount = 320,
     this.publishDate = 'Jan 2023',
+    required this.format,
+    required this.mirrorLink,
   });
 
   @override
@@ -278,9 +282,10 @@ class _BookDetailScreenState extends State<BookDetailScreen>
               moveScreen(
                   context,
                   FileViewerScreen(
-                      filePath:
-                          "https://www.antennahouse.com/hubfs/xsl-fo-sample/pdf/basic-link-1.pdf",
-                      fileName: "Anteena"));
+                    mirrorLink: widget.mirrorLink,
+                    format: widget.format,
+                    title: widget.bookName,
+                  ));
             },
             child: GlassmorphicContainer(
               width: double.infinity,
@@ -428,21 +433,6 @@ class _BookDetailScreenState extends State<BookDetailScreen>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey[800],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: Image.network(
-                    "https://picsum.photos/200/200?random=99",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
               SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -457,15 +447,6 @@ class _BookDetailScreenState extends State<BookDetailScreen>
                       ),
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      "Award-winning author with over 15 published works. Known for captivating storytelling and rich character development.",
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white70,
-                        height: 1.5,
-                      ),
-                    ),
                     SizedBox(height: 12),
                   ],
                 ),

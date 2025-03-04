@@ -54,6 +54,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   String? _selectedBookAuthor;
   String? _selectedBookImageUrl;
   String? _selectedBookDescription;
+  String? _selectedBookMirrorLink;
+  String? _selectedBookFormat;
 
   // Non-romantic emojis for reading status
   final List<String> readingEmojis = [
@@ -336,6 +338,9 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       _selectedBookTitle = book.title;
       _selectedBookAuthor = book.author;
       _selectedBookDescription = "don't judge it yet ;)";
+      _selectedBookFormat = book.format;
+      _selectedBookMirrorLink = book.libgenMirror;
+
       _selectedBookImageUrl =
           "https://cdn-icons-png.flaticon.com/512/3389/3389081.png";
     });
@@ -429,10 +434,13 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         scale: 1.0,
         duration: const Duration(milliseconds: 200),
         child: FloatingActionButton(
-          onPressed: () {
-            // Navigate to messaging screen
+          onPressed: () async {
+            // get space with code
+
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            final spaceName = prefs.getString("space_name");
             moveScreen(context,
-                GroupChatScreen(spaceName: "active space", code: widget.code));
+                GroupChatScreen(spaceName: spaceName!, code: widget.code));
           },
           backgroundColor: Colors.blue,
           elevation: 3,
@@ -733,6 +741,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       description: _selectedBookDescription ?? "",
       imageUrl: _selectedBookImageUrl ??
           "https://cdn-icons-png.flaticon.com/512/3389/3389081.png",
+      format: _selectedBookFormat ?? "",
+      mirrorLink: _selectedBookMirrorLink ?? "",
       // onBackPressed: _backToBookSearch, // Add back functionality
     );
   }

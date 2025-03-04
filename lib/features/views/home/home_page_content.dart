@@ -234,7 +234,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                         "${books[index]}",
                                         style: GoogleFonts.poppins(
                                           color: Colors.black,
-                                          fontSize: width * 0.036,
+                                          fontSize: width * 0.034,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
