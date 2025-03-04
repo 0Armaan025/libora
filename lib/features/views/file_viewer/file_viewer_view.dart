@@ -103,7 +103,6 @@ class _FileViewerScreenState extends State<FileViewerScreen> {
               : isPdf
                   ? _buildPdfView()
                   : _buildEpubView(),
-      bottomNavigationBar: isPdf ? _buildPdfBottomBar() : null,
     );
   }
 
@@ -115,56 +114,5 @@ class _FileViewerScreenState extends State<FileViewerScreen> {
     return _epubController == null
         ? const Center(child: CircularProgressIndicator())
         : EpubView(controller: _epubController!);
-  }
-
-  Widget _buildPdfBottomBar() {
-    return BottomAppBar(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.first_page),
-            onPressed: () {
-              _pdfController?.setPage(0);
-              setState(() {
-                _pdfCurrentPage = 0;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.navigate_before),
-            onPressed: _pdfCurrentPage > 0
-                ? () {
-                    _pdfController?.setPage(_pdfCurrentPage - 1);
-                    setState(() {
-                      _pdfCurrentPage--;
-                    });
-                  }
-                : null,
-          ),
-          Text('${_pdfCurrentPage + 1} / $_pdfTotalPages'),
-          IconButton(
-            icon: const Icon(Icons.navigate_next),
-            onPressed: _pdfCurrentPage < _pdfTotalPages - 1
-                ? () {
-                    _pdfController?.setPage(_pdfCurrentPage + 1);
-                    setState(() {
-                      _pdfCurrentPage++;
-                    });
-                  }
-                : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.last_page),
-            onPressed: () {
-              _pdfController?.setPage(_pdfTotalPages - 1);
-              setState(() {
-                _pdfCurrentPage = _pdfTotalPages - 1;
-              });
-            },
-          ),
-        ],
-      ),
-    );
   }
 }
