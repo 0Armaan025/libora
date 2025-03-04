@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:libora/features/repositories/book_repository.dart';
 import 'package:libora/features/views/file_viewer/file_viewer_view.dart';
 import 'package:libora/utils/utils.dart';
 
@@ -17,6 +18,8 @@ class BookDetailScreen extends StatefulWidget {
   final String publishDate;
   final String mirrorLink;
   final String format;
+  final String language;
+  final VoidCallback onBackPressed;
 
   const BookDetailScreen({
     super.key,
@@ -29,6 +32,8 @@ class BookDetailScreen extends StatefulWidget {
     this.pageCount = 320,
     this.publishDate = 'Jan 2023',
     required this.format,
+    required this.onBackPressed,
+    required this.language,
     required this.mirrorLink,
   });
 
@@ -40,6 +45,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool isFavorite = false;
+  bool _viewFile = false;
 
   @override
   void initState() {
@@ -53,46 +59,59 @@ class _BookDetailScreenState extends State<BookDetailScreen>
     super.dispose();
   }
 
+  void toggleGoBack() async {
+    setState(() {
+      _viewFile = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              _buildAppBar(),
-              SliverToBoxAdapter(
-                child: _buildBookHeader(),
-              ),
-              SliverToBoxAdapter(
-                child: _buildTabBar(),
-              ),
-              SliverFillRemaining(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildOverviewTab(),
-                    _buildDetailsTab(),
-                    _buildReviewsTab(),
+    return _viewFile
+        ? FileViewerScreen(
+            mirrorLink: widget.mirrorLink,
+            format: widget.format,
+            title: widget.bookName,
+            action: toggleGoBack,
+          )
+        : Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF1A1A2E),
+                    Color(0xFF16213E),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: _buildBottomBar(),
-    );
+              child: SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    _buildAppBar(),
+                    SliverToBoxAdapter(
+                      child: _buildBookHeader(),
+                    ),
+                    SliverToBoxAdapter(
+                      child: _buildTabBar(),
+                    ),
+                    SliverFillRemaining(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildOverviewTab(),
+                          _buildDetailsTab(),
+                          _buildReviewsTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            bottomNavigationBar: _buildBottomBar(),
+          );
   }
 
   Widget _buildAppBar() {
@@ -102,7 +121,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
       floating: true,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: widget.onBackPressed,
       ),
       actions: [],
     );
@@ -279,13 +298,11 @@ class _BookDetailScreenState extends State<BookDetailScreen>
           // Read a sample section
           InkWell(
             onTap: () {
-              moveScreen(
-                  context,
-                  FileViewerScreen(
-                    mirrorLink: widget.mirrorLink,
-                    format: widget.format,
-                    title: widget.bookName,
-                  ));
+              setState(() {
+                _viewFile = true;
+                BookRepository _bookRepository = BookRepository();
+                _bookRepository.addReadBook(context, widget.bookName);
+              });
             },
             child: GlassmorphicContainer(
               width: double.infinity,
@@ -369,12 +386,18 @@ class _BookDetailScreenState extends State<BookDetailScreen>
 
   Widget _buildDetailsTab() {
     final bookDetails = [
-      {"label": "Page Count", "value": "${widget.pageCount} pages"},
+      {"label": "Title", "value": widget.bookName},
+      {"label": "Author", "value": widget.authorName},
       {"label": "Published", "value": widget.publishDate},
-      {"label": "Language", "value": "English"},
-      {"label": "ISBN", "value": "978-3-16-148410-0"},
-      {"label": "Publisher", "value": "Penguin Books"},
-      {"label": "Format", "value": "Hardcover, eBook, Audiobook"},
+      {
+        "label": "Language",
+        "value": widget.language.isNotEmpty
+            ? widget.language
+            : "Not defined / most probably eng"
+      },
+      {"label": "Publish date", "value": widget.publishDate},
+      {"label": "Format", "value": widget.format},
+      {"label": "Page count", "value": "${widget.pageCount} pages"},
     ];
 
     return SingleChildScrollView(
@@ -810,16 +833,11 @@ class _BookDetailScreenState extends State<BookDetailScreen>
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Opening the book..."),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                );
+                setState(() {
+                  _viewFile = true;
+                  BookRepository _bookRepository = BookRepository();
+                  _bookRepository.addReadBook(context, widget.bookName);
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,

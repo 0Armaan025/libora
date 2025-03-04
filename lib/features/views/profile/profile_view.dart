@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:libora/features/controllers/auth_controller.dart';
+import 'package:libora/features/repositories/auth_repository.dart';
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:libora/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 
 class ProfilePage extends StatefulWidget {
   final String username;
-  final String imageUrl;
-  final int followers;
-  final int following;
-  final int booksRead;
-  final bool isCurrentUser;
 
   const ProfilePage({
     super.key,
     required this.username,
-    required this.imageUrl,
-    required this.followers,
-    required this.following,
-    required this.booksRead,
-    required this.isCurrentUser,
   });
 
   @override
@@ -27,11 +21,18 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
-  late String _username;
+  String _username = '';
+  String _imageUrl = '';
+  List<String> _followers = [];
+  List<String> _following = [];
+  List<String> _booksRead = [];
+  bool _isCurrentUser = false;
+  bool _isLoading = true;
+  bool _weFollowing = false;
+
   late TextEditingController _usernameController;
   bool _isEditingUsername = false;
 
-  // Animation controller for special developer animation
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _scaleAnimation;
@@ -40,10 +41,13 @@ class _ProfilePageState extends State<ProfilePage>
   @override
   void initState() {
     super.initState();
-    _username = widget.username;
-    _usernameController = TextEditingController(text: _username);
+    _initializeAnimations();
+    _fetchUserData();
+  }
 
-    // Initialize animation controller for dev user
+  void _initializeAnimations() {
+    _usernameController = TextEditingController(text: widget.username);
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -74,6 +78,66 @@ class _ProfilePageState extends State<ProfilePage>
     ));
   }
 
+  Future<void> _fetchUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final currentUsername = prefs.getString('name');
+      _isCurrentUser = currentUsername.toString().trim() ==
+          widget.username.toString().trim();
+
+      final authController = AuthController();
+      final userData =
+          await authController.getUserDetails(context, widget.username);
+
+      setState(() {
+        // showSnackBar(context, userData?['profileImage'] ?? 'bye');
+        _username = userData?['name'] ?? widget.username;
+        _imageUrl = userData?['user']['profileImage'] ??
+            'https://cdn-icons-png.flaticon.com/128/1999/1999625.png';
+        _followers = List<String>.from(userData?['user']['followers'] ?? []);
+        _following = List<String>.from(userData?['user']['following'] ?? []);
+        _booksRead = List<String>.from(userData?['user']['booksRead'] ?? []);
+        _weFollowing = _followers.contains(currentUsername);
+        _isLoading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Failed to load user data', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    try {
+      final result = await AuthRepository().followUser(context, _username);
+      if (result) {
+        setState(() {
+          _weFollowing = !_weFollowing;
+          if (_weFollowing) {
+            _followers.add(_username);
+          } else {
+            _followers.remove(_username);
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update follow status',
+              style: GoogleFonts.poppins()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -83,79 +147,21 @@ class _ProfilePageState extends State<ProfilePage>
 
   bool get _isDevUser => _username == "0Armaan025";
 
-  // Method to handle name change
-  void _showChangeNameDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Change Username',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: TextField(
-          controller: _usernameController,
-          decoration: InputDecoration(
-            hintText: 'Enter new username',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.black, width: 2),
-            ),
-          ),
-          style: GoogleFonts.poppins(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: Colors.grey[800]),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _username = _usernameController.text;
-              });
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Username updated successfully!',
-                    style: GoogleFonts.poppins(),
-                  ),
-                  backgroundColor: Colors.black,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              'Save',
-              style: GoogleFonts.poppins(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final Pallete palette = Pallete();
 
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: palette.bgColor,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.black),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: palette.bgColor,
-      // Remove app bar completely
       body: SingleChildScrollView(
         child: SafeArea(
           child: Column(
@@ -189,284 +195,394 @@ class _ProfilePageState extends State<ProfilePage>
       ),
       child: Column(
         children: [
-          // Profile image with animation if dev user
-          _isDevUser
-              ? AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _colorAnimation.value ?? Colors.black,
-                            width: 3,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (_colorAnimation.value ?? Colors.black)
-                                  .withOpacity(0.3),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Transform.rotate(
-                          angle: _rotationAnimation.value,
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage: NetworkImage(widget.imageUrl),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black, width: 3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(widget.imageUrl),
-                  ),
-                ),
+          _buildProfileImage(),
           const SizedBox(height: 20),
-
-          // Username with edit option
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_isEditingUsername) ...[
-                SizedBox(
-                  width: 200,
-                  child: TextField(
-                    controller: _usernameController,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.check, color: Colors.black),
-                  onPressed: () {
-                    setState(() {
-                      _username = _usernameController.text;
-                      _isEditingUsername = false;
-                    });
-                  },
-                ),
-              ] else ...[
-                GestureDetector(
-                  onTap: widget.isCurrentUser
-                      ? () {
-                          setState(() {
-                            _isEditingUsername = true;
-                          });
-                        }
-                      : null,
-                  child: Text(
-                    _username,
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                if (widget.isCurrentUser)
-                  IconButton(
-                    icon: Icon(Icons.edit, size: 18, color: Colors.black),
-                    onPressed: () {
-                      setState(() {
-                        _isEditingUsername = true;
-                      });
-                    },
-                  ),
-                if (_isDevUser)
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Container(
-                        margin: const EdgeInsets.only(left: 5),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _colorAnimation.value,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (_colorAnimation.value ?? Colors.black)
-                                  .withOpacity(0.3),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          "DEV",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-              ],
-            ],
-          ),
-
+          _buildUsernameSection(),
           const SizedBox(height: 24),
-
-          // Followers & Following
-          InkWell(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      "viewing others' followers/following list will come in an update, I thought why would others look at that lol"),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildStatItem("${widget.followers}", "Followers", palette),
-                  Container(
-                    height: 40,
-                    width: 1,
-                    color: Colors.grey[300],
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                  ),
-                  _buildStatItem("${widget.following}", "Following", palette),
-                ],
-              ),
-            ),
-          ),
-
+          _buildFollowersSection(),
           const SizedBox(height: 24),
-
-          // Follow/Edit Button
-          widget.isCurrentUser
-              ? ElevatedButton.icon(
-                  onPressed:
-                      _showChangeNameDialog, // New function to change name
-                  icon: const Icon(Icons.edit),
-                  label: Text(
-                    "Edit Profile",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    minimumSize: const Size(250, 50),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.black.withOpacity(0.3)),
-                    ),
-                  ),
-                )
-              : ElevatedButton(
-                  onPressed: () {
-                    // Follow/Unfollow logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Followed user',
-                          style: GoogleFonts.poppins(),
-                        ),
-                        backgroundColor: Colors.black,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    minimumSize: const Size(250, 50),
-                    elevation: 2,
-                    shadowColor: Colors.black.withOpacity(0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Follow",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+          _buildActionButton(),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String count, String label, Pallete palette) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to followers/following list
-      },
-      child: Column(
-        children: [
-          Text(
-            count,
+  Widget _buildProfileImage() {
+    return _isDevUser
+        ? AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _colorAnimation.value ?? Colors.black,
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_colorAnimation.value ?? Colors.black)
+                            .withOpacity(0.3),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Transform.rotate(
+                    angle: _rotationAnimation.value,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(_imageUrl),
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+        : Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundImage: NetworkImage(_imageUrl),
+            ),
+          );
+  }
+
+  Widget _buildUsernameSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (_isEditingUsername)
+          _buildUsernameEditField()
+        else
+          _buildUsernameDisplay(),
+      ],
+    );
+  }
+
+  Widget _buildUsernameEditField() {
+    return Row(
+      children: [
+        SizedBox(
+          width: 200,
+          child: TextField(
+            controller: _usernameController,
+            textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+            decoration: InputDecoration(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.black),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.black, width: 2),
+              ),
             ),
           ),
-          Text(
-            label,
+        ),
+        IconButton(
+          icon: Icon(Icons.check, color: Colors.black),
+          onPressed: () {
+            setState(() {
+              _username = _usernameController.text;
+              _isEditingUsername = false;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUsernameDisplay() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: _isCurrentUser
+              ? () => setState(() => _isEditingUsername = true)
+              : null,
+          child: Text(
+            _username,
             style: GoogleFonts.poppins(
-              color: Colors.grey[600],
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        if (_isCurrentUser)
+          IconButton(
+              icon: Icon(Icons.edit, size: 18, color: Colors.black),
+              onPressed: () {
+                showSnackBar(context,
+                    "sorry! this feature is not available yet im seeking some response first :(");
+                setState(() {
+                  _isEditingUsername = true;
+                });
+              }),
+        if (_isDevUser) _buildDevBadge(),
+      ],
+    );
+  }
+
+  Widget _buildDevBadge() {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Container(
+          margin: const EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: _colorAnimation.value,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: (_colorAnimation.value ?? Colors.black).withOpacity(0.3),
+                blurRadius: 4,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Text(
+            "DEV",
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFollowersSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildStatItem("${_followers.length}", "Followers"),
+          Container(
+            height: 40,
+            width: 1,
+            color: Colors.grey[300],
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+          ),
+          _buildStatItem("${_following.length}", "Following"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton() {
+    return _isCurrentUser
+        ? ElevatedButton.icon(
+            onPressed: () {
+              showSnackBar(context,
+                  "sorry! this feature is not available yet im seeking some response first :(");
+              _showChangeNameDialog();
+            },
+            icon: const Icon(Icons.edit),
+            label: Text(
+              "Edit Profile",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[100],
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              minimumSize: const Size(250, 50),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.black.withOpacity(0.3)),
+              ),
+            ),
+          )
+        : ElevatedButton(
+            onPressed: _toggleFollow,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              minimumSize: const Size(250, 50),
+              elevation: 2,
+              shadowColor: Colors.black.withOpacity(0.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              _weFollowing ? "UnFollow" : "Follow",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          );
+  }
+
+  Widget _buildStatItem(String count, String label) {
+    return Column(
+      children: [
+        Text(
+          count,
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: Colors.grey[600],
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showChangeNameDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Change Username',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: _usernameController,
+          decoration: InputDecoration(
+            hintText: 'Enter new username',
+            hintStyle: GoogleFonts.poppins(color: Colors.grey),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.black, width: 2),
+            ),
+          ),
+          style: GoogleFonts.poppins(),
+          maxLength: 20, // Limit username length
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: Colors.grey[800]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Validate username
+              final newUsername = _usernameController.text.trim();
+              if (newUsername.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Username cannot be empty',
+                      style: GoogleFonts.poppins(),
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              try {
+                // // Call auth controller to update username
+                // final authController = AuthController();
+                // final success =
+                //     await authController.updateUsername(context, newUsername);
+
+                // if (success) {
+                //   // Update local state
+                //   setState(() {
+                //     _username = newUsername;
+                //     _isEditingUsername = false;
+                //   });
+
+                //   // Close dialog
+                //   Navigator.pop(context);
+
+                //   // Show success message
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     SnackBar(
+                //       content: Text(
+                //         'Username updated successfully!',
+                //         style: GoogleFonts.poppins(),
+                //       ),
+                //       backgroundColor: Colors.green,
+                //     ),
+                //   );
+                // } else {
+                //   // Handle update failure
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     SnackBar(
+                //       content: Text(
+                //         'Failed to update username',
+                //         style: GoogleFonts.poppins(),
+                //       ),
+                //       backgroundColor: Colors.red,
+                //     ),
+                //   );
+                // }
+              } catch (e) {
+                // Handle any errors during username update
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'An error occurred: ${e.toString()}',
+                      style: GoogleFonts.poppins(),
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Save',
+              style: GoogleFonts.poppins(),
             ),
           ),
         ],
@@ -544,7 +660,7 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
                 const SizedBox(height: 20),
                 _buildBooksReadIllustration(
-                    widget.booksRead, bookGradients, palette),
+                    _booksRead.length, bookGradients, palette),
               ],
             ),
           );
@@ -600,7 +716,7 @@ class _ProfilePageState extends State<ProfilePage>
             ),
             const SizedBox(height: 20),
             _buildBooksReadIllustration(
-                widget.booksRead, bookGradients, palette),
+                _booksRead.length, bookGradients, palette),
           ],
         ),
       );

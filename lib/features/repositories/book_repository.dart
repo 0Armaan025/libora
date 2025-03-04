@@ -3,7 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/models/Book.dart';
+import 'package:libora/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookRepository {
   final String baseUrl =
@@ -44,6 +47,64 @@ class BookRepository {
     } catch (e) {
       print('error is ${e.toString()}');
       throw Exception("Failed to parse books");
+    }
+  }
+
+  Future<bool> addReadBook(BuildContext context, String bookName) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Get current user's name from SharedPreferences
+    String? currentUserName = prefs.getString("name");
+
+    if (currentUserName == null) {
+      showSnackBar(context, "You're not logged in. Please log in first.");
+      return false;
+    }
+
+    try {
+      // Get the current user's data
+      final currentUserData =
+          await AuthController().getUserDetails(context, currentUserName);
+
+      if (currentUserData == null) {
+        showSnackBar(context, "Error fetching user data.");
+        return false;
+      }
+
+      // Convert to List<String> to manipulate
+      List<dynamic> currentReadBooks =
+          List<dynamic>.from(currentUserData['readBooks'] ?? []);
+
+      // Check if book is already in read books
+      if (currentReadBooks.contains(bookName)) {
+        return false;
+      }
+
+      // Add the book name
+      currentReadBooks.add(bookName);
+
+      // Prepare updates
+      final userUpdates = {'readBooks': currentReadBooks};
+
+      // Update user's read books
+      final updateUrl =
+          Uri.parse('https://libora-api.onrender.com/api/user/update-user');
+      final updateResponse = await http.patch(updateUrl,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"name": currentUserName, "updates": userUpdates}));
+
+      // Check if update was successful
+      if (updateResponse.statusCode == 200) {
+        showSnackBar(context, "Book added to your read list!");
+        return true;
+      } else {
+        showSnackBar(context, "Failed to add book to read list.");
+        return false;
+      }
+    } catch (e) {
+      print("Add Read Book Error: $e");
+      showSnackBar(context, "An error occurred. Please try again.");
+      return false;
     }
   }
 

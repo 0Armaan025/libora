@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/models/User.dart';
+import 'package:libora/features/views/profile/profile_view.dart';
 import 'package:libora/utils/theme/Pallete.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -151,65 +153,66 @@ class _UserSearchViewState extends State<UserSearchView> {
   Future<void> followUser(String username) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-
       final currentUserName = prefs.getString("name");
 
-      setState(() {
-        if (followedUsers.contains(username)) {
-          followedUsers.remove(username);
-        } else {
-          followedUsers.add(username);
-        }
-      });
+      if (currentUserName == null) {
+        showSnackBar(context, "You're not logged in.");
+        return;
+      }
 
-      final isFollowing = followedUsers.contains(username);
-
+      // Optimized follow/unfollow logic
       final url =
           Uri.parse('https://libora-api.onrender.com/api/user/update-user');
 
-      final response = await http.patch(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "name": currentUserName, // Current user's name
-          "updates": {
-            // If following, add the username to the following array, otherwise remove it
-            "following":
-                isFollowing ? {"\$addToSet": username} : {"\$pull": username}
-          }
-        }),
-      );
+      // Get current user data to check current following status
+      final currentUserData =
+          await AuthController().getUserDetails(context, currentUserName);
+      final targetUserData =
+          await AuthController().getUserDetails(context, username);
 
-      // Now update the target user's followers list
-      await http.patch(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "name": username, // Target user's name
-          "updates": {
-            // If following, add current user to followers array, otherwise remove
-            "followers": isFollowing
-                ? {"\$addToSet": currentUserName}
-                : {"\$pull": currentUserName}
-          }
-        }),
-      );
+      if (currentUserData == null || targetUserData == null) {
+        showSnackBar(context, "Error fetching user data.");
+        return;
+      }
 
-      if (response.statusCode == 200) {
-        if (mounted) {
-          showSnackBar(
-              context,
-              isFollowing
-                  ? "Following $username successfully"
-                  : "Unfollowed $username successfully");
-        }
+      List<dynamic> currentUserFollowing =
+          List<dynamic>.from(currentUserData['following'] ?? []);
+      List<dynamic> targetUserFollowers =
+          List<dynamic>.from(targetUserData['followers'] ?? []);
+
+      bool isCurrentlyFollowing = currentUserFollowing.contains(username);
+
+      // Prepare updates
+      Map<String, dynamic> currentUserUpdates = {};
+      Map<String, dynamic> targetUserUpdates = {};
+
+      if (isCurrentlyFollowing) {
+        // Unfollow logic
+        currentUserFollowing.remove(username);
+        targetUserFollowers.remove(currentUserName);
       } else {
-        // API call failed
-        if (mounted) {
-          showSnackBar(context, "Failed to update following status");
-        }
+        // Follow logic
+        currentUserFollowing.add(username);
+        targetUserFollowers.add(currentUserName);
+      }
 
-        // Revert UI change
+      currentUserUpdates['following'] = currentUserFollowing;
+      targetUserUpdates['followers'] = targetUserFollowers;
+
+      // Update current user's following
+      final currentUserUpdateResponse = await http.patch(url,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(
+              {"name": currentUserName, "updates": currentUserUpdates}));
+
+      // Update target user's followers
+      final targetUserUpdateResponse = await http.patch(url,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"name": username, "updates": targetUserUpdates}));
+
+      // Check if both updates were successful
+      if (currentUserUpdateResponse.statusCode == 200 &&
+          targetUserUpdateResponse.statusCode == 200) {
         setState(() {
           if (followedUsers.contains(username)) {
             followedUsers.remove(username);
@@ -217,26 +220,24 @@ class _UserSearchViewState extends State<UserSearchView> {
             followedUsers.add(username);
           }
         });
+
+        showSnackBar(
+            context,
+            isCurrentlyFollowing
+                ? "Unfollowed $username"
+                : "Followed $username");
+      } else {
+        showSnackBar(context, "Failed to update follow status.");
       }
     } catch (e) {
-      // Error occurred
-      if (mounted) {
-        showSnackBar(context, 'Error occurred: ${e.toString()}');
-      }
-
-      // Revert UI change
-      setState(() {
-        if (followedUsers.contains(username)) {
-          followedUsers.remove(username);
-        } else {
-          followedUsers.add(username);
-        }
-      });
+      print('Follow User Error: $e');
+      showSnackBar(context, 'Error occurred: ${e.toString()}');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Rest of the build method remains the same as in the previous implementation
     return Scaffold(
       backgroundColor: Pallete().bgColor,
       body: SafeArea(
@@ -256,7 +257,7 @@ class _UserSearchViewState extends State<UserSearchView> {
               ),
             ),
 
-            // Search Bar with Animation
+            // Search Bar with Animation (previous implementation)
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -409,20 +410,7 @@ class _UserSearchViewState extends State<UserSearchView> {
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             // Navigate to user profile
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Viewing ${user.name}'s profile"),
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            );
-            // Here you would navigate to the user profile
-            // Navigator.push(context, MaterialPageRoute(
-            //   builder: (context) => UserProfileScreen(userId: user.id),
-            // ));
+            moveScreen(context, ProfilePage(username: user.name));
           },
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -506,20 +494,6 @@ class _UserSearchViewState extends State<UserSearchView> {
                   onPressed: () {
                     // Call the followUser function and pass the user ID
                     followUser(user.name);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(isFollowing
-                            ? "Unfollowed ${user.name}"
-                            : "Following ${user.name}"),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor:
-                            isFollowing ? Colors.grey : Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    );
                   },
                   style: TextButton.styleFrom(
                     backgroundColor:

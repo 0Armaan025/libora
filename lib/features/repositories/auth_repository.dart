@@ -85,6 +85,89 @@ class AuthRepository {
     }
   }
 
+  Future<bool> followUser(BuildContext context, String username) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Get current user's name from SharedPreferences
+    String? currentUserName = prefs.getString("name");
+
+    if (currentUserName == null) {
+      showSnackBar(context, "You're not logged in. Please log in first.");
+      return false;
+    }
+
+    try {
+      // First, get the current user's data
+      final currentUserData = await getUserData(context, currentUserName);
+
+      // Then, get the target user's data
+      final targetUserData = await getUserData(context, username);
+
+      if (currentUserData == null || targetUserData == null) {
+        showSnackBar(context, "Error fetching user data.");
+        return false;
+      }
+
+      // Convert to List<String> to manipulate
+      List<dynamic> currentUserFollowing =
+          List<dynamic>.from(currentUserData['following'] ?? []);
+      List<dynamic> targetUserFollowers =
+          List<dynamic>.from(targetUserData['followers'] ?? []);
+
+      bool isCurrentlyFollowing = currentUserFollowing.contains(username);
+      bool isTargetFollowedByCurrentUser =
+          targetUserFollowers.contains(currentUserName);
+
+      // Prepare updates for both users
+      Map<String, dynamic> currentUserUpdates = {};
+      Map<String, dynamic> targetUserUpdates = {};
+
+      if (isCurrentlyFollowing) {
+        // Unfollow logic
+        currentUserFollowing.remove(username);
+        targetUserFollowers.remove(currentUserName);
+      } else {
+        // Follow logic
+        currentUserFollowing.add(username);
+        targetUserFollowers.add(currentUserName);
+      }
+
+      // Prepare updates
+      currentUserUpdates['following'] = currentUserFollowing;
+      targetUserUpdates['followers'] = targetUserFollowers;
+
+      // Update current user
+      final currentUserUpdateUrl =
+          Uri.parse('https://libora-api.onrender.com/api/user/update-user');
+      final currentUserUpdateResponse = await http.patch(currentUserUpdateUrl,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(
+              {"name": currentUserName, "updates": currentUserUpdates}));
+
+      // Update target user
+      final targetUserUpdateUrl =
+          Uri.parse('https://libora-api.onrender.com/api/user/update-user');
+      final targetUserUpdateResponse = await http.patch(targetUserUpdateUrl,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"name": username, "updates": targetUserUpdates}));
+
+      // Check if both updates were successful
+      if (currentUserUpdateResponse.statusCode == 200 &&
+          targetUserUpdateResponse.statusCode == 200) {
+        // Successful follow/unfollow
+
+        return !isCurrentlyFollowing; // Returns true if now following, false if unfollowed
+      } else {
+        showSnackBar(context, "Failed to update follow status.");
+        return false;
+      }
+    } catch (e) {
+      print("Follow/Unfollow Error: $e");
+      showSnackBar(context, "An error occurred. Please try again.");
+      return false;
+    }
+  }
+
   Future<List<UserModel>> searchUsers(
       BuildContext context, String query) async {
     final url = Uri.parse(

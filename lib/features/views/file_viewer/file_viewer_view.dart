@@ -10,12 +10,14 @@ class FileViewerScreen extends StatefulWidget {
   final String mirrorLink;
   final String format;
   final String title;
+  final VoidCallback action;
 
   const FileViewerScreen({
     Key? key,
     required this.mirrorLink,
     required this.format,
     required this.title,
+    required this.action,
   }) : super(key: key);
 
   @override
@@ -95,7 +97,13 @@ class _FileViewerScreenState extends State<FileViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: widget.action,
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _filePath == null

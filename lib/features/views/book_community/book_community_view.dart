@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,6 +24,8 @@ class BookCommunityScreen extends StatefulWidget {
 class _BookCommunityScreenState extends State<BookCommunityScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  Timer? _memberUpdateTimer;
 
   // Separate controllers for each tab
   final TextEditingController _communitySearchController =
@@ -56,6 +60,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   String? _selectedBookDescription;
   String? _selectedBookMirrorLink;
   String? _selectedBookFormat;
+  String? _selectedBookLanguage;
 
   // Non-romantic emojis for reading status
   final List<String> readingEmojis = [
@@ -145,6 +150,16 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     _bookSearchFocusNode.addListener(_onBookSearchFocusChanged);
 
     getPeople();
+
+    _startPeriodicMemberUpdate();
+  }
+
+  void _startPeriodicMemberUpdate() {
+    _memberUpdateTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (mounted) {
+        getPeopleHere();
+      }
+    });
   }
 
   // Get random emoji for reading status
@@ -225,6 +240,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
   @override
   void dispose() {
+    _memberUpdateTimer?.cancel();
     getPersonouttaHere();
     _tabController.dispose();
 
@@ -336,6 +352,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     setState(() {
       _showBookDetail = true;
       _selectedBookTitle = book.title;
+      _selectedBookLanguage = book.language;
       _selectedBookAuthor = book.author;
       _selectedBookDescription = "don't judge it yet ;)";
       _selectedBookFormat = book.format;
@@ -737,13 +754,14 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   Widget _buildBookDetailScreen() {
     return BookDetailScreen(
       bookName: _selectedBookTitle ?? "",
+      language: _selectedBookLanguage ?? "",
       authorName: _selectedBookAuthor ?? "",
       description: _selectedBookDescription ?? "",
       imageUrl: _selectedBookImageUrl ??
           "https://cdn-icons-png.flaticon.com/512/3389/3389081.png",
       format: _selectedBookFormat ?? "",
       mirrorLink: _selectedBookMirrorLink ?? "",
-      // onBackPressed: _backToBookSearch, // Add back functionality
+      onBackPressed: _backToBookSearch, // Add back functionality
     );
   }
 

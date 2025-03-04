@@ -38,7 +38,7 @@ class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
     final size = MediaQuery.of(context).size;
     return Container(
       width: size.width * 1,
-      height: size.height * 0.2,
+      height: size.height * 0.25,
       margin: const EdgeInsets.symmetric(horizontal: 12)
           .copyWith(left: 0, bottom: 20),
       decoration: BoxDecoration(
@@ -63,7 +63,7 @@ class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
           Padding(
             padding: const EdgeInsets.only(left: 12.0),
             child: SizedBox(
-              height: size.height * 0.1,
+              height: size.height * 0.15,
               child: spaces.isEmpty
                   ? _buildEmptyState()
                   : ListView.builder(
@@ -78,7 +78,7 @@ class _ActiveSpacesTileState extends State<ActiveSpacesTile> {
                           // profilePictures: List<String>.from(
                           //   space["profiles"],
                           // ),
-                          profilePictures: [""],
+                          people: space.people,
                           // lastActive: space["lastActive"],
                         );
                       },

@@ -18,6 +18,8 @@ class SpacesView extends StatefulWidget {
 class _SpacesViewState extends State<SpacesView> {
   // Sample data for spaces
   List<dynamic> spaces = [];
+  List<String> users = [];
+  List<String> images = [];
 
   @override
   void initState() {
@@ -134,7 +136,7 @@ class _SpacesViewState extends State<SpacesView> {
                                   // profilePictures: List<String>.from(
                                   //   space["profiles"],
                                   // ),
-                                  profilePictures: [""],
+                                  people: space.people,
                                   // lastActive: space["lastActive"],
                                 );
                               },

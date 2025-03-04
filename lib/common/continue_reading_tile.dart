@@ -6,27 +6,23 @@ import 'dart:math';
 class ContinueReadingTile extends StatelessWidget {
   final List<Map<String, String>> quotes = [
     {
-      "text": "The only way to do great work is to love what you do.",
+      "text": "Don't judge a book by its cover, this is not about books",
       "author": "Armaan"
     },
+    {"text": "Incomplete information is always dangerous", "author": "Armaan"},
     {
-      "text": "Life is what happens when you're busy making other plans.",
-      "author": "Armaan"
-    },
-    {
-      "text":
-          "The future belongs to those who believe in the beauty of their dreams.",
-      "author": "Armaan"
-    },
-    {
-      "text": "In the middle of difficulty lies opportunity.",
+      "text": "People can go from people you know to don't, but books won't",
       "author": "Armaan"
     },
     {
       "text": "The best way to predict the future is to create it.",
       "author": "Armaan"
     },
-    {"text": "Simplicity is the ultimate sophistication.", "author": "Armaan"},
+    {
+      "text":
+          "The only realization that we have in the future may or may not be the regret we have today",
+      "author": "Armaan"
+    },
     {
       "text": "Yesterday is history, tomorrow is a mystery, today is a gift.",
       "author": "Armaan"

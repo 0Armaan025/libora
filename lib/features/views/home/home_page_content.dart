@@ -26,20 +26,20 @@ class _HomePageContentState extends State<HomePageContent> {
   List<String> coverImages = [
     "https://imgs.search.brave.com/NgzTuJyzanpPTR01qfRLSpgm9443rUGt4YN_U5VYbf4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/cG9yY2hsaWdodGJv/b2tzLmNvbS9hc3Nl/dHMvaW1hZ2VzL2Jv/b2tzLzQvMjQvNzI0/LzM3MjQvOTc4MTU4/NTA5MzcyNC5qcGc_/dz0xMDAwJnNjYWxl/PWJvdGgmbW9kZT1j/cm9wJnU9NjM4NzUz/MTM3NzMzOTcwMDAw",
     "https://imgs.search.brave.com/2mz26amRNRJbEbixA4LIgYaIuMgTSCn2v51lOPJ08j8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iYXJv/bmZpZy5jb20vY2Ru/L3Nob3AvcHJvZHVj/dHMvYXRvbWljLWhh/Yml0c19idXktdmFy/aWFudF8wMS5qcGc_/dj0xNjA5MTk3NjUw/JndpZHRoPTE0MDA",
-    "https://imgs.search.brave.com/qkxc5ePjzRMn_LcrWRqDK5IN-G6Tzc6Sc-q97B_Y88o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDF1NFZlbzNBWkwu/anBn",
+    "https://imgs.search.brave.com/2rLiZFUYijTjEABvDwhARxgm7JvcjZGw_aHSNFIm00s/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZS5zbGlkZXNoYXJl/Y2RuLmNvbS90aGVz/ZWNyZXRieXJob25k/YWJ5cm5lZW5nbGlz/aC0yMjAyMTcxMzE3/MDgvODUvVGhlLXNl/Y3JldC1ieS1yaG9u/ZGEtYnlybmUtZW5n/bGlzaC0xLTMyMC5q/cGc",
     "https://imgs.search.brave.com/o85FGZdf6q43ufrMMcjsdW9tCM8njvlwOWpPYc4xjjg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDFmK095d2dVY0wu/anBn"
   ];
 
   List<String> books = [
     "The power of your subsconscious mind",
     "Atomic Habits",
-    "The art of reading people",
+    "The Secret",
     "RD SHARMA MATH CLASS 9"
   ];
   List<String> authors = [
     "Joseph Murphy",
     "James clear",
-    "Ian Tuhovsky",
+    "Rhonda Byrne",
     "RD SHARMA, JK"
   ];
 
@@ -87,7 +87,7 @@ class _HomePageContentState extends State<HomePageContent> {
     AuthController controller = AuthController();
     final user = await controller.getUserDetails(context, username);
     setState(() {
-      profileImage = user?['user']?['profile_image'] ?? '';
+      profileImage = user?['user']?['profileImage'] ?? '';
       print('profile image is $profileImage');
     });
   }
