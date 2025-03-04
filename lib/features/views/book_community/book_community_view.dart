@@ -5,6 +5,7 @@ import 'package:libora/features/controllers/auth_controller.dart';
 import 'package:libora/features/controllers/book_controller.dart';
 import 'package:libora/features/models/Book.dart';
 import 'package:libora/features/repositories/space_repository.dart';
+import 'package:libora/features/views/book_info/book_info_view.dart';
 import 'package:libora/features/views/msg_view/msg_view.dart';
 import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,6 +45,15 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   bool isLoading = true;
 
   List<BookModel> searchedBooks = [];
+
+  // Flag to show book detail screen
+  bool _showBookDetail = false;
+
+  // Selected book information
+  String? _selectedBookTitle;
+  String? _selectedBookAuthor;
+  String? _selectedBookImageUrl;
+  String? _selectedBookDescription;
 
   // Non-romantic emojis for reading status
   final List<String> readingEmojis = [
@@ -237,7 +247,10 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     // Fetch books based on search query
     BookController controller = BookController();
     searchedBooks = await controller.fetchBooks(context, query);
-    setState(() {});
+    setState(() {
+      // Reset book detail view when performing a new search
+      _showBookDetail = false;
+    });
   }
 
   @override
@@ -300,12 +313,12 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     );
   }
 
-  // Function to handle book selection
+  // Modified to show book details in the read tab
   void onBookSelected(BookModel book) {
     // First switch to reading tab
     _tabController.animateTo(1);
 
-    // Then open the book reader
+    // Show a snackbar indicating the book is being opened
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Opening "${book.title}"'),
@@ -317,14 +330,22 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       ),
     );
 
-    // Here you would navigate to your epub/pdf reader view
-    // For example:
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => BookReaderScreen(book: book),
-    //   ),
-    // );
+    // Update the state to show book details within the tab
+    setState(() {
+      _showBookDetail = true;
+      _selectedBookTitle = book.title;
+      _selectedBookAuthor = book.author;
+      _selectedBookDescription = "don't judge it yet ;)";
+      _selectedBookImageUrl =
+          "https://cdn-icons-png.flaticon.com/512/3389/3389081.png";
+    });
+  }
+
+  // Function to go back to the book search view
+  void _backToBookSearch() {
+    setState(() {
+      _showBookDetail = false;
+    });
   }
 
   // Function to handle book search
@@ -401,7 +422,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           // Tab 1: Community Grid with Search
           _buildCommunityTab(),
           // Tab 2: Book Search and Read
-          _buildReadTab(),
+          _showBookDetail ? _buildBookDetailScreen() : _buildReadTab(),
         ],
       ),
       floatingActionButton: AnimatedScale(
@@ -704,6 +725,18 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     );
   }
 
+  // New method to build the book detail screen within the tab
+  Widget _buildBookDetailScreen() {
+    return BookDetailScreen(
+      bookName: _selectedBookTitle ?? "",
+      authorName: _selectedBookAuthor ?? "",
+      description: _selectedBookDescription ?? "",
+      imageUrl: _selectedBookImageUrl ??
+          "https://cdn-icons-png.flaticon.com/512/3389/3389081.png",
+      // onBackPressed: _backToBookSearch, // Add back functionality
+    );
+  }
+
   Widget _buildEmptySearchState() {
     return Center(
       child: Column(
@@ -737,13 +770,12 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   }
 
   Widget _buildBookCard(BookModel book) {
-    return Hero(
-      tag: 'book-${book.title}',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onBookSelected(book),
-          borderRadius: BorderRadius.circular(16),
+    return InkWell(
+      onTap: () => onBookSelected(book),
+      child: Hero(
+        tag: 'book-${book.title}',
+        child: Material(
+          color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
