@@ -7,6 +7,7 @@ import 'package:intl/intl.dart'; // Import this
 import 'package:libora/features/controllers/auth_controller.dart';
 
 import 'package:libora/utils/theme/Pallete.dart';
+import 'package:libora/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePageContent extends StatefulWidget {
@@ -21,6 +22,26 @@ class _HomePageContentState extends State<HomePageContent> {
   String formattedDate = ""; // Store the formatted date
   String greeting = "";
   String profileImage = "";
+
+  List<String> coverImages = [
+    "https://imgs.search.brave.com/NgzTuJyzanpPTR01qfRLSpgm9443rUGt4YN_U5VYbf4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/cG9yY2hsaWdodGJv/b2tzLmNvbS9hc3Nl/dHMvaW1hZ2VzL2Jv/b2tzLzQvMjQvNzI0/LzM3MjQvOTc4MTU4/NTA5MzcyNC5qcGc_/dz0xMDAwJnNjYWxl/PWJvdGgmbW9kZT1j/cm9wJnU9NjM4NzUz/MTM3NzMzOTcwMDAw",
+    "https://imgs.search.brave.com/2mz26amRNRJbEbixA4LIgYaIuMgTSCn2v51lOPJ08j8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iYXJv/bmZpZy5jb20vY2Ru/L3Nob3AvcHJvZHVj/dHMvYXRvbWljLWhh/Yml0c19idXktdmFy/aWFudF8wMS5qcGc_/dj0xNjA5MTk3NjUw/JndpZHRoPTE0MDA",
+    "https://imgs.search.brave.com/qkxc5ePjzRMn_LcrWRqDK5IN-G6Tzc6Sc-q97B_Y88o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDF1NFZlbzNBWkwu/anBn",
+    "https://imgs.search.brave.com/o85FGZdf6q43ufrMMcjsdW9tCM8njvlwOWpPYc4xjjg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDFmK095d2dVY0wu/anBn"
+  ];
+
+  List<String> books = [
+    "The power of your subsconscious mind",
+    "Atomic Habits",
+    "The art of reading people",
+    "RD SHARMA MATH CLASS 9"
+  ];
+  List<String> authors = [
+    "Joseph Murphy",
+    "James clear",
+    "Ian Tuhovsky",
+    "RD SHARMA, JK"
+  ];
 
   @override
   void initState() {
@@ -106,8 +127,8 @@ class _HomePageContentState extends State<HomePageContent> {
                           children: [
                             CircleAvatar(
                               radius: width * 0.07,
-                              backgroundImage: const AssetImage(
-                                  "assets/images/logo.png"), // Adjust logo size
+                              backgroundImage: NetworkImage(
+                                  profileImage), // Adjust logo size
                             ),
                             SizedBox(width: width * 0.03),
                             Column(
@@ -173,55 +194,63 @@ class _HomePageContentState extends State<HomePageContent> {
                         ),
                       ),
                       SizedBox(height: height * 0.02),
-                      SizedBox(
-                        height: height * 0.32,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 5,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: EdgeInsets.only(right: width * 0.04),
-                              child: Container(
-                                width: width * 0.4,
-                                padding: EdgeInsets.all(width * 0.02),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: width * 0.4,
-                                      height: height * 0.2,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: NetworkImage(profileImage),
-                                          fit: BoxFit.cover,
+                      InkWell(
+                        onTap: () {
+                          showSnackBar(
+                              context, "Nah nah nah, create a space first :D");
+                        },
+                        child: SizedBox(
+                          height: height * 0.35,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: books.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(right: width * 0.04),
+                                child: Container(
+                                  width: width * 0.4,
+                                  padding: EdgeInsets.all(width * 0.02),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: width * 0.4,
+                                        height: height * 0.2,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                coverImages[index]),
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: height * 0.01),
-                                    Text(
-                                      "Book Name $index",
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.black,
-                                        fontSize: width * 0.045,
-                                        fontWeight: FontWeight.w500,
+                                      SizedBox(height: height * 0.01),
+                                      Text(
+                                        "${books[index]}",
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.black,
+                                          fontSize: width * 0.036,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      "Author Name",
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.grey.shade700,
-                                        fontSize: width * 0.04,
+                                      Text(
+                                        authors[index],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.grey.shade700,
+                                          fontSize: width * 0.04,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                       SizedBox(height: height * 0.02),

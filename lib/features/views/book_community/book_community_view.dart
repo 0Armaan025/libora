@@ -21,10 +21,23 @@ class BookCommunityScreen extends StatefulWidget {
 class _BookCommunityScreenState extends State<BookCommunityScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
-  bool _isSearchFocused = false;
-  final FocusNode _searchFocusNode = FocusNode();
+
+  // Separate controllers for each tab
+  final TextEditingController _communitySearchController =
+      TextEditingController();
+  final TextEditingController _bookSearchController = TextEditingController();
+
+  // Separate focus nodes for each tab
+  final FocusNode _communitySearchFocusNode = FocusNode();
+  final FocusNode _bookSearchFocusNode = FocusNode();
+
+  // Separate search queries for each tab
+  String _communitySearchQuery = "";
+  String _bookSearchQuery = "";
+
+  // Track which search field is focused
+  bool _isCommunitySearchFocused = false;
+  bool _isBookSearchFocused = false;
 
   // List to store community members with their details
   List<Map<String, dynamic>> communityMembers = [];
@@ -110,8 +123,14 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _searchController.addListener(_onSearchChanged);
-    _searchFocusNode.addListener(_onSearchFocusChanged);
+
+    // Set up listeners for community tab
+    _communitySearchController.addListener(_onCommunitySearchChanged);
+    _communitySearchFocusNode.addListener(_onCommunitySearchFocusChanged);
+
+    // Set up listeners for book tab
+    _bookSearchController.addListener(_onBookSearchChanged);
+    _bookSearchFocusNode.addListener(_onBookSearchFocusChanged);
 
     getPeople();
   }
@@ -196,13 +215,18 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
   void dispose() {
     getPersonouttaHere();
     _tabController.dispose();
-    _searchController.dispose();
-    _searchFocusNode.dispose();
+
+    // Dispose controllers and focus nodes for both tabs
+    _communitySearchController.dispose();
+    _bookSearchController.dispose();
+    _communitySearchFocusNode.dispose();
+    _bookSearchFocusNode.dispose();
+
     super.dispose();
   }
 
   void searchBooks(BuildContext context) async {
-    final query = _searchController.text;
+    final query = _bookSearchController.text;
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter a search term")),
@@ -235,15 +259,28 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     }
   }
 
-  void _onSearchChanged() {
+  // Updated search listeners for each tab
+  void _onCommunitySearchChanged() {
     setState(() {
-      _searchQuery = _searchController.text;
+      _communitySearchQuery = _communitySearchController.text;
     });
   }
 
-  void _onSearchFocusChanged() {
+  void _onCommunitySearchFocusChanged() {
     setState(() {
-      _isSearchFocused = _searchFocusNode.hasFocus;
+      _isCommunitySearchFocused = _communitySearchFocusNode.hasFocus;
+    });
+  }
+
+  void _onBookSearchChanged() {
+    setState(() {
+      _bookSearchQuery = _bookSearchController.text;
+    });
+  }
+
+  void _onBookSearchFocusChanged() {
+    setState(() {
+      _isBookSearchFocused = _bookSearchFocusNode.hasFocus;
     });
   }
 
@@ -265,6 +302,10 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
 
   // Function to handle book selection
   void onBookSelected(BookModel book) {
+    // First switch to reading tab
+    _tabController.animateTo(1);
+
+    // Then open the book reader
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Opening "${book.title}"'),
@@ -275,6 +316,15 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
         ),
       ),
     );
+
+    // Here you would navigate to your epub/pdf reader view
+    // For example:
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => BookReaderScreen(book: book),
+    //   ),
+    // );
   }
 
   // Function to handle book search
@@ -282,22 +332,28 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     searchBooks(context);
   }
 
+  // Filtering community members based on community search query only
   List<Map<String, dynamic>> get filteredMembers {
-    if (_searchQuery.isEmpty) {
+    if (_communitySearchQuery.isEmpty) {
       return communityMembers;
     }
     return communityMembers.where((member) {
-      return member["name"].toLowerCase().contains(_searchQuery.toLowerCase());
+      return member["name"]
+          .toLowerCase()
+          .contains(_communitySearchQuery.toLowerCase());
     }).toList();
   }
 
+  // Filtering books based on book search query only
   List<Map<String, dynamic>> get filteredBooks {
-    if (_searchQuery.isEmpty) {
+    if (_bookSearchQuery.isEmpty) {
       return books;
     }
     return books.where((book) {
-      return book["title"].toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          book["author"].toLowerCase().contains(_searchQuery.toLowerCase());
+      return book["title"]
+              .toLowerCase()
+              .contains(_bookSearchQuery.toLowerCase()) ||
+          book["author"].toLowerCase().contains(_bookSearchQuery.toLowerCase());
     }).toList();
   }
 
@@ -394,8 +450,61 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           ),
         ),
 
+        // Add Community Search Bar
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color:
+                  _isCommunitySearchFocused ? Colors.white : Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: _isCommunitySearchFocused
+                  ? [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.1),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 2),
+                      )
+                    ]
+                  : [],
+              border: Border.all(
+                color: _isCommunitySearchFocused
+                    ? Colors.blue.withOpacity(0.5)
+                    : Colors.grey[300]!,
+                width: 1,
+              ),
+            ),
+            child: TextField(
+              controller: _communitySearchController,
+              focusNode: _communitySearchFocusNode,
+              decoration: InputDecoration(
+                hintText: "Search community members...",
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: _isCommunitySearchFocused
+                      ? Colors.blue
+                      : Colors.grey[600],
+                ),
+                suffixIcon: _communitySearchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _communitySearchController.clear();
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+            ),
+          ),
+        ),
+
         // Results count when searching
-        if (_searchQuery.isNotEmpty)
+        if (_communitySearchQuery.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Align(
@@ -415,7 +524,8 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           child: isLoading
               ? Center(child: CircularProgressIndicator())
               : filteredMembers.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState("No community members found",
+                      "Try a different search term or invite more people")
                   : Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: GridView.builder(
@@ -504,13 +614,13 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Search Bar
+          // Search Bar for Books Tab
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: _isSearchFocused ? Colors.white : Colors.grey[100],
+              color: _isBookSearchFocused ? Colors.white : Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
-              boxShadow: _isSearchFocused
+              boxShadow: _isBookSearchFocused
                   ? [
                       BoxShadow(
                         color: Colors.blue.withOpacity(0.1),
@@ -521,27 +631,27 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                     ]
                   : [],
               border: Border.all(
-                color: _isSearchFocused
+                color: _isBookSearchFocused
                     ? Colors.blue.withOpacity(0.5)
                     : Colors.grey[300]!,
                 width: 1,
               ),
             ),
             child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
+              controller: _bookSearchController,
+              focusNode: _bookSearchFocusNode,
               onSubmitted: onBookSearch,
               decoration: InputDecoration(
                 hintText: "Search for a book...",
                 prefixIcon: Icon(
                   Icons.search,
-                  color: _isSearchFocused ? Colors.blue : Colors.grey[600],
+                  color: _isBookSearchFocused ? Colors.blue : Colors.grey[600],
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
+                suffixIcon: _bookSearchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          _searchController.clear();
+                          _bookSearchController.clear();
                         },
                       )
                     : null,
@@ -554,24 +664,26 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           const SizedBox(height: 16),
 
           // Header for book section
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
-            child: Text(
-              _searchQuery.isEmpty ? "" : "Search Results",
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+          if (_bookSearchQuery.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+              child: Text(
+                "Search Results",
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
             ),
-          ),
 
           // Book Grid
           Expanded(
-            child: _searchQuery.isEmpty
-                ? _buildEmptySearchState() // New empty state when no search
+            child: _bookSearchQuery.isEmpty
+                ? _buildEmptySearchState() // Empty state when no search
                 : searchedBooks.isEmpty
-                    ? _buildEmptyState() // Your existing empty state for no results
+                    ? _buildEmptyState("No books found",
+                        "Try a different search term") // Empty state for no results
                     : GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
@@ -665,8 +777,13 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
                         ),
                       ],
                       image: DecorationImage(
-                        image: NetworkImage(""),
+                        image: NetworkImage(
+                            "https://cdn-icons-png.flaticon.com/512/3389/3389081.png"),
                         fit: BoxFit.cover,
+                        onError: (exception, stackTrace) {
+                          // Fallback image in case of error
+                          return;
+                        },
                       ),
                     ),
                   ),
@@ -716,7 +833,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String title, String subtitle) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -728,7 +845,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            "No results found",
+            title,
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -737,7 +854,7 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            "Try a different search term",
+            subtitle,
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey[600],

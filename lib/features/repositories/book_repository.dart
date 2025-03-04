@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:libora/features/models/Book.dart';
 
 class BookRepository {
-  final String baseUrl = "https://libora-api.onrender.com";
+  final String baseUrl =
+      "https://5000-0armaan025-liboraapi-tiluu0ibikh.ws-us118.gitpod.io";
 
   Future<List<BookModel>> fetchBooks(BuildContext context, String query) async {
     final response = await http.get(
