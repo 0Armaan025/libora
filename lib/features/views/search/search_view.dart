@@ -483,7 +483,7 @@ class _UserSearchViewState extends State<UserSearchView> {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: _buildFollowInfo(
-                            formatFollowers(user.followers.length!),
+                            formatFollowers(user.followers.length),
                             "followers"),
                       ),
                     ],

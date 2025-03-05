@@ -5,7 +5,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:libora/features/repositories/book_repository.dart';
 import 'package:libora/features/views/file_viewer/file_viewer_view.dart';
-import 'package:libora/utils/utils.dart';
 
 class BookDetailScreen extends StatefulWidget {
   final String bookName;
