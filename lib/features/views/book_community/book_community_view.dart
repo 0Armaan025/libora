@@ -196,34 +196,32 @@ class _BookCommunityScreenState extends State<BookCommunityScreen>
     communityMembers.clear();
 
     // Get details for each person and add to communityMembers
-    if (peopleList is List) {
-      for (String personName in peopleList) {
-        try {
-          final userDetails = await getUserDetails(context, personName);
-          if (userDetails != null) {
-            // Add user with details to our list
-            communityMembers.add({
-              "name": personName,
-              "emoji": getRandomEmoji(), // Random emoji for reading status
-              "image": userDetails["profileImage"] ??
-                  "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
-            });
-          }
-        } catch (e) {
-          print("Error getting details for $personName: $e");
-          // Add with default values if there's an error
+    for (String personName in peopleList) {
+      try {
+        final userDetails = await getUserDetails(context, personName);
+        if (userDetails != null) {
+          // Add user with details to our list
           communityMembers.add({
             "name": personName,
-            "emoji": getRandomEmoji(),
-            "image": "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
+            "emoji": getRandomEmoji(), // Random emoji for reading status
+            "image": userDetails["profileImage"] ??
+                "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
           });
         }
+      } catch (e) {
+        print("Error getting details for $personName: $e");
+        // Add with default values if there's an error
+        communityMembers.add({
+          "name": personName,
+          "emoji": getRandomEmoji(),
+          "image": "https://cdn-icons-png.flaticon.com/128/1999/1999625.png",
+        });
       }
-
-      // Update the UI
-      setState(() {});
     }
-  }
+
+    // Update the UI
+    setState(() {});
+    }
 
   // Get user details - Modified to return user data
   Future<Map<String, dynamic>?> getUserDetails(

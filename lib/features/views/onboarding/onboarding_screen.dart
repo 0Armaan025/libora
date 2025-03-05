@@ -38,7 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     final name = prefs.getString('name');
     print(
-      "the user name is ${name}",
+      "the user name is $name",
     );
     final isLoggedIn = prefs.getString('status');
 

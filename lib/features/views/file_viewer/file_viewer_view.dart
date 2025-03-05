@@ -13,12 +13,12 @@ class FileViewerScreen extends StatefulWidget {
   final VoidCallback action;
 
   const FileViewerScreen({
-    Key? key,
+    super.key,
     required this.mirrorLink,
     required this.format,
     required this.title,
     required this.action,
-  }) : super(key: key);
+  });
 
   @override
   _FileViewerScreenState createState() => _FileViewerScreenState();
@@ -28,8 +28,8 @@ class _FileViewerScreenState extends State<FileViewerScreen> {
   late bool isPdf;
   EpubController? _epubController;
   PDFViewController? _pdfController;
-  int _pdfTotalPages = 0;
-  int _pdfCurrentPage = 0;
+  final int _pdfTotalPages = 0;
+  final int _pdfCurrentPage = 0;
   bool _isLoading = true;
   String? _filePath;
 

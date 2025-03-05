@@ -42,10 +42,10 @@ class _SignUpPageState extends State<SignUpPage> {
   void signUp(
     BuildContext context,
   ) async {
-    AuthController _controller = AuthController();
+    AuthController controller = AuthController();
     print(
         'in sign up of page function ${_nameController.text.trim() + _passwordController.text.trim()}');
-    await _controller.signUp(context, _nameController.text.trim(),
+    await controller.signUp(context, _nameController.text.trim(),
         _passwordController.text.trim(), selectedAvatar);
   }
 

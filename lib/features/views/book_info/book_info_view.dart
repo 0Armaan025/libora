@@ -300,8 +300,8 @@ class _BookDetailScreenState extends State<BookDetailScreen>
             onTap: () {
               setState(() {
                 _viewFile = true;
-                BookRepository _bookRepository = BookRepository();
-                _bookRepository.addReadBook(context, widget.bookName);
+                BookRepository bookRepository = BookRepository();
+                bookRepository.addReadBook(context, widget.bookName);
               });
             },
             child: GlassmorphicContainer(
@@ -835,8 +835,8 @@ class _BookDetailScreenState extends State<BookDetailScreen>
               onPressed: () {
                 setState(() {
                   _viewFile = true;
-                  BookRepository _bookRepository = BookRepository();
-                  _bookRepository.addReadBook(context, widget.bookName);
+                  BookRepository bookRepository = BookRepository();
+                  bookRepository.addReadBook(context, widget.bookName);
                 });
               },
               style: ElevatedButton.styleFrom(

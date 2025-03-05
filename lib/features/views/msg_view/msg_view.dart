@@ -97,12 +97,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     try {
       final messages = await _apiService.getMessages(widget.code);
 
-      if (messages == null) {
-        _updateDebugInfo("API returned null messages");
-      } else {
-        _updateDebugInfo("Received ${messages.length} messages from API");
-      }
-
+      _updateDebugInfo("Received ${messages.length} messages from API");
+    
       if (mounted) {
         // Check if widget is still in the tree
         setState(() {
@@ -165,7 +161,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           widget.code, _currentUsername!, messageText);
 
       // If the server returns an updated message list, update the UI
-      if (sentMessages != null && sentMessages.isNotEmpty) {
+      if (sentMessages.isNotEmpty) {
         _updateDebugInfo("Received updated message list from server");
         if (mounted) {
           setState(() {

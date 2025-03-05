@@ -83,6 +83,7 @@ class AuthRepository {
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');
       }
     }
+    return null;
   }
 
   Future<bool> followUser(BuildContext context, String username) async {
@@ -91,7 +92,7 @@ class AuthRepository {
     // Get current user's name from SharedPreferences
     String? currentUserName = prefs.getString("name");
 
-    if (currentUserName == null) {
+    if (currentUserName == null) {  
       showSnackBar(context, "You're not logged in. Please log in first.");
       return false;
     }
@@ -187,8 +188,9 @@ class AuthRepository {
           if (context.mounted) showSnackBar(context, "No users found.");
           return [];
         } else {
-          if (context.mounted)
+          if (context.mounted) {
             showSnackBar(context, "Found ${users.length} users.");
+          }
           List<UserModel> usersList = [];
           for (var user in users) {
             usersList.add(UserModel.fromJson(user));
@@ -200,8 +202,9 @@ class AuthRepository {
         return [];
       }
     } catch (e) {
-      if (context.mounted)
+      if (context.mounted) {
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');
+      }
       return [];
     }
   }

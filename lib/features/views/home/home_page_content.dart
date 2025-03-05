@@ -231,7 +231,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                       ),
                                       SizedBox(height: height * 0.01),
                                       Text(
-                                        "${books[index]}",
+                                        books[index],
                                         style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontSize: width * 0.034,

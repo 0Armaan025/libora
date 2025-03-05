@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:libora/features/views/auth/sign_up_page.dart';
-import 'package:libora/features/views/home/home_page.dart';
-import 'package:libora/features/views/onboarding/onboarding_content_page.dart';
 import 'package:libora/features/views/onboarding/onboarding_screen.dart';
 
 void main() {

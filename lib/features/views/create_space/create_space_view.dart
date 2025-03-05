@@ -57,7 +57,7 @@ class _CreateSpaceScreenState extends State {
       // Save username for future use
 
       final prefs = await SharedPreferences.getInstance();
-      final name = await prefs.getString('name');
+      final name = prefs.getString('name');
 
       // Create space on the server
       final space = await _apiService.createSpace(

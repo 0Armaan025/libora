@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:libora/common/space_list.dart';
-import 'package:libora/features/models/Space.dart';
 import 'package:libora/features/repositories/space_repository.dart';
 import 'package:libora/features/views/create_space/create_space_view.dart';
 import 'package:libora/features/views/join_space/join_space_view.dart';

@@ -20,8 +20,8 @@ class _LogInPageState extends State<LogInPage> {
 
   void logIn(BuildContext context) {
     // Implement login functionality here
-    AuthController _controller = AuthController();
-    _controller.logIn(
+    AuthController controller = AuthController();
+    controller.logIn(
         context, _nameController.text.trim(), _passwordController.text.trim());
   }
 

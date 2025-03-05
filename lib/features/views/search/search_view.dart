@@ -59,8 +59,9 @@ class _UserSearchViewState extends State<UserSearchView> {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         if (!data.containsKey('users')) {
-          if (mounted)
+          if (mounted) {
             showSnackBar(context, "Invalid response: No 'users' key found.");
+          }
           setState(() {
             _users = [];
             _isLoading = false;
@@ -108,8 +109,9 @@ class _UserSearchViewState extends State<UserSearchView> {
       }
     } catch (e) {
       print('Error: $e');
-      if (mounted)
+      if (mounted) {
         showSnackBar(context, 'Error occurred :(, please contact Armaan!');
+      }
       setState(() {
         _isLoading = false;
       });
@@ -478,13 +480,12 @@ class _UserSearchViewState extends State<UserSearchView> {
                         ],
                       ),
                       SizedBox(height: 4),
-                      if (user.followers != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: _buildFollowInfo(
-                              formatFollowers(user.followers.length!),
-                              "followers"),
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: _buildFollowInfo(
+                            formatFollowers(user.followers.length!),
+                            "followers"),
+                      ),
                     ],
                   ),
                 ),

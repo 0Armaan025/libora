@@ -11,7 +11,7 @@ class ApiService {
 
   // Create a new space
   Future createSpace(String name, String person, String code) async {
-    print("name: ${person}, person: ${name}, code: ${code}");
+    print("name: $person, person: $name, code: $code");
     final response = await http.post(
       Uri.parse('$baseUrl/api/space/create'),
       headers: {'Content-Type': 'application/json'},
@@ -27,7 +27,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final username = await prefs.getString('name');
+      final username = prefs.getString('name');
       final spaceName = await prefs.setString("space_name", person);
       final spaceCode = await prefs.setString("space_code", code);
       final inSpace = await prefs.setBool("in_space", true);
@@ -51,7 +51,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final username = await prefs.getString('name');
+      final username = prefs.getString('name');
       final spaceName =
           await prefs.setString("space_name", data['space']['name']);
       final spaceCode = await prefs.setString("space_code", code);
@@ -75,7 +75,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final username = await prefs.getString('name');
+      final username = prefs.getString('name');
       final spaceName = await prefs.setString("space_name", "");
       final spaceCode = await prefs.setString("space_code", "");
       final inSpace = await prefs.setBool("in_space", false);
@@ -112,7 +112,7 @@ class ApiService {
 
   Future<List> getPeople(String code) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/api/space/get-people?code=${code}'),
+      Uri.parse('$baseUrl/api/space/get-people?code=$code'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -155,7 +155,7 @@ class ApiService {
   // Get messages
   Future<List> getMessages(String code) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/api/space/get-messages?code=${code}'),
+      Uri.parse('$baseUrl/api/space/get-messages?code=$code'),
       headers: {'Content-Type': 'application/json'},
     );
 
